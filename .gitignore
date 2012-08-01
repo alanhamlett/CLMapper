@@ -1,0 +1,34 @@
+# Misc #
+########
+*.pem
+
+# Compiled source #
+###################
+*.crx
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+*.sqlite3
+
+# OS generated files #
+######################
+.DS_Store
+ehthumbs.db
+Thumbs.db
+.com.apple.timemachine.supported
+.localized
+

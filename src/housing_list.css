@@ -1,0 +1,60 @@
+
+p.row < p {
+    margin-right: auto;
+    width: 100%;
+}
+
+#listings blockquote {
+    margin-right: 0px;
+}
+
+#listings {
+    width: 50%;
+}
+
+#sidebar {
+    position: fixed;
+    overflow-y: auto;
+    overflow-x: auto;
+    background-color: #eee;
+    padding: 1%;
+    margin-left: 0px;
+    height: 100%;
+    width: 50%;
+}
+
+div#messagestable,
+div#messagestable div,
+h4.ban,
+div.bchead,
+blockquote.blockquote-first,
+blockquote.blockquote-first form,
+blockquote.blockquote-first fieldset,
+#nextpage,
+#footer {
+    margin-right: 2.127659574%;
+}
+
+blockquote.blockquote-first,
+blockquote.blockquote-first form,
+blockquote.blockquote-first fieldset {
+    margin-left: 0%;
+}
+
+.current-listing {
+    background-color: #eee;
+}
+
+#right-side {
+    margin-left: 0px;
+}
+
+#sidebar {
+    padding: 0px;
+}
+
+#sidebar-map {
+    width: 100%;
+    height: 100%;
+}
+
