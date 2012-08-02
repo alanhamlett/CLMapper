@@ -14,7 +14,7 @@ Controller.prototype.Initialize = function() {
         } else { // not a single post so hopefully a list of posts
             this.SetupSidebar();
             //this.RemoveSearch();
-            this.StartPageScript('pages/hhh/list.js');
+            this.StartPageScript('pages/hhh/index.js');
         }
     }
     return this;
