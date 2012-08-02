@@ -1,5 +1,6 @@
 
 function Mapper() {
+    this.swlat=this.nelat=this.swlng=this.nelng=undefined;
     this.numPans = 0;
     this.maxPans = 15;
     return this;

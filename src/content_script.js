@@ -1,8 +1,23 @@
 
 function Controller() {
-    this.SetupSidebar();
-    //this.RemoveSearch();
-    this.StartPageScript('pages/hhh/list.js');
+    return this;
+}
+
+Controller.prototype.Initialize = function() {
+
+    // Chrome pattern matching is too basic (and chrome web store has bugs)
+    // so check if we really want to run the extension here
+    var currentUrl = window.location.href;
+    if (currentUrl !== undefined) {
+        if (/\/\d+\.html$/.test(currentUrl)) { // single post
+            // noop until pages/hhh/post.js is finished
+        } else { // not a single post so hopefully a list of posts
+            this.SetupSidebar();
+            //this.RemoveSearch();
+            this.StartPageScript('pages/hhh/list.js');
+        }
+    }
+    return this;
 }
 
 Controller.prototype.SetupSidebar = function() {
@@ -24,4 +39,5 @@ Controller.prototype.StartPageScript = function(file) {
 }
 
 var controller = new Controller();
+controller.Initialize();
 
