@@ -5,7 +5,7 @@ p.row < p {
 }
 
 #listings blockquote {
-    margin-right: 0px;
+    margin-right: 0;
 }
 
 #listings {
@@ -18,7 +18,7 @@ p.row < p {
     overflow-x: auto;
     background-color: #eee;
     padding: 1%;
-    margin-left: 0px;
+    margin-left: 0;
     height: 100%;
     width: 50%;
 }
@@ -46,15 +46,19 @@ blockquote.blockquote-first fieldset {
 }
 
 #right-side {
-    margin-left: 0px;
+    margin-left: 0;
 }
 
 #sidebar {
-    padding: 0px;
+    padding: 0;
 }
 
 #sidebar-map {
     width: 100%;
     height: 100%;
+}
+
+.zero-margin {
+    margin: 0;
 }
 

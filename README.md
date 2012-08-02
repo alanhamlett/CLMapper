@@ -1,12 +1,12 @@
 CLMapper
 ========
 
-Craigslist posts shown on a map while viewing Craigslist housing.
+Craigslist posts shown on a map.
 
 
 ## Installation
 
-https://chrome.google.com/webstore/detail/omonmigaleaafgpkgoammpclbcdepjpi
+[CLMapper on the Chrome Web Store](https://chrome.google.com/webstore/detail/omonmigaleaafgpkgoammpclbcdepjpi)
 
 ## Loading From Source
 

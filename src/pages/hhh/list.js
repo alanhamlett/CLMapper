@@ -1,5 +1,7 @@
 
 function Mapper() {
+    this.numPans = 0;
+    this.maxPans = 15;
     return this;
 }
 
@@ -12,7 +14,7 @@ Mapper.prototype.CreateMap = function(callback) {
 
 Mapper.prototype.SetupMarkers = function() {
     this.markers = {};
-    this.markerIconNormal = new google.maps.MarkerImage('marker-green.png');
+    /*this.markerIconNormal = new google.maps.MarkerImage('marker-green.png');
     this.markerIconNormal = new google.maps.MarkerImage('marker-yellow.png');
     google.maps.Marker.prototype.markerIconNormal = this.markerIconNormal;
     google.maps.Marker.prototype.markerIconActive = this.markerIconActive;
@@ -21,7 +23,7 @@ Mapper.prototype.SetupMarkers = function() {
     };
     google.maps.Marker.prototype.UnHighlightMarker = function() {
         this.setIcon(this.markerIconNormal);
-    }
+    }*/
 };
 
 Mapper.prototype.HighlightMarker = function(key) {
@@ -66,13 +68,11 @@ Mapper.prototype.AddMarker = function(json, id) {
     if (this.markers[ukey] === undefined) {
         var marker = new google.maps.Marker({
             map: this.map,
-            position: position,
-            animation: google.maps.Animation.DROP
-            //icon: this.markerIconNormal
+            position: position
         });
         this.markers[ukey] = marker;
         google.maps.event.addListener(marker, 'click', function() {
-            window.location = json.url;
+            window.open(json.url);
         });
         google.maps.event.addListener(marker, 'mouseover', function() {
             $('p.row').each(function(key,val) {
@@ -84,13 +84,15 @@ Mapper.prototype.AddMarker = function(json, id) {
             //$('#sidebar-body').text(json.formatted_address);
         });
     }
-    //this.map.fitBounds(viewport);
-    //this.map.setCenter(position);
-    this.FitMarkerInMap(json);
+    this.FitMarkerInMap(json, position);
     return marker;
 };
 
-Mapper.prototype.FitMarkerInMap = function(json) {
+Mapper.prototype.FitMarkerInMap = function(json, position) {
+    if (this.numPans > this.maxPans) {
+        return;
+    }
+    this.numPans++;
     if (this.swlat === undefined || this.swlat < json.viewport.sw.lat) {
         this.swlat = json.viewport.sw.lat;
     }
@@ -106,6 +108,7 @@ Mapper.prototype.FitMarkerInMap = function(json) {
     var sw = new google.maps.LatLng(this.swlat, this.swlng);
     var ne = new google.maps.LatLng(this.nelat, this.nelng);
     var viewport = new google.maps.LatLngBounds(sw, ne);
+    this.map.setCenter(position);
     this.map.fitBounds(viewport);
 }
 
@@ -122,42 +125,37 @@ window.GeocodingQueueCounter = 0;
 window.GeocodingQueue = new Array();
 
 function Controller() {
+    // backoff for geocaching api rate limiting
+    // default 0.2 seconds between requests
+    this.geocoderTimeout = 0.1;
     return this;
 }
 
 Controller.prototype.AddMarkersFromPage = function() {
-    window.setTimeout(controller.ProcessGeocodingQueue, 1 * 1000);
+    this.ContinueGeocodingQueue();
     var $ps = $('p.row');
     for (var i = 0; i < $ps.length; i++) {
         var $p = $($ps[i]);
-        this.GetHtml($p.find('a'), i);
+        this.GetHtml($p.find('a').attr('href'), i);
     }
 }
 
-Controller.prototype.GetHtml = function($link, id) {
+Controller.prototype.GetHtml = function(url, id) {
     var $this = this;
-    var url = $link.attr('href');
-    var content = localStorage.getItem('content:'+url);
-    if (content === null) {
-        $.ajax({
-            url: url,
-            type: 'GET',
-            dataType: 'text',
-            success: function(data) {
-                $this.ParseHtml(data, url, id);
-            }
-        });
-    } else {
-        var content = JSON.parse(content);
-        this.ParseHtml(content.content, url, id);
-    }
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'text',
+        success: function(data) {
+            $this.ParseHtml(data, url, id);
+        }
+    });
 }
 
 Controller.prototype.ParseHtml = function(content, url, id) {
     var json = JSON.stringify({
         content: content
     });
-    //localStorage.setItem('content:'+url, json);
     var address = this.ParseAddress(content);
     if (address !== undefined) {
         var geocoded = localStorage.getItem('address:'+address);
@@ -206,22 +204,28 @@ Controller.prototype.ProcessGeocodingQueue = function() {
                         localStorage.setItem('address:'+job.address, JSON.stringify(json));
                     } catch(e) {
                         if (e.name === 'QUOTA_EXCEEDED_ERR') {
-                            console.warn('Quota exceeded when saving address: '+job.address);
+                            console.warn('localStorage quota exceeded when saving address: '+job.address);
                             controller.TrimStorage();
                             localStorage.setItem('address:'+job.address, JSON.stringify(json));
                         }
                     }
                     mapper.AddMarker(json, job.rowId);
                 } else {
-                    //console.warn('Geocoding "'+job.address+'" failed because: '+status);
-                    GeocodingQueue.push(JSON.stringify(job));
+                    if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                        // only re-queue this job if we failed because of trying too fast
+                        //console.warn('Geocoding "'+job.address+'" failed because: '+status);
+                        controller.geocoderTimeout = controller.geocoderTimeout * 1.1;
+                        GeocodingQueue.unshift(JSON.stringify(job));
+                    } {
+                        console.warn('Geocoding "'+job.address+'" failed because: '+status);
+                    }
                 }
             });
         } else {
             mapper.AddMarker(JSON.parse(geocoded), job.rowId);
         }
     }
-    window.setTimeout(controller.ProcessGeocodingQueue, 1 * 1000);
+    controller.ContinueGeocodingQueue();
 }
 
 Controller.prototype.ParseAddress = function(html) {
@@ -240,6 +244,17 @@ Controller.prototype.TrimStorage = function() {
     if (localStorage.length > 0) {
         localStorage.removeItem(localStorage.key(0));
     }
+}
+
+Controller.prototype.ContinueGeocodingQueue = function() {
+    //console.log('Geocoding Timeout: '+controller.geocoderTimeout);
+    if (controller.geocoderTimeout !== undefined) {
+        window.setTimeout(controller.ProcessGeocodingQueue, Math.ceil(controller.geocoderTimeout * 1000));
+    }
+}
+
+Controller.prototype.StopGeocodingQueue = function() {
+    controller.geocoderTimeout = undefined;
 }
 
 window.controller = new Controller();

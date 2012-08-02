@@ -2,7 +2,7 @@
 function Controller() {
     this.SetupSidebar();
     //this.RemoveSearch();
-    this.StartPageScript('interfaces/housing/list.js');
+    this.StartPageScript('pages/hhh/list.js');
 }
 
 Controller.prototype.SetupSidebar = function() {
