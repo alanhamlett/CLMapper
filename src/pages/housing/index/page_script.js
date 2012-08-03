@@ -1,5 +1,8 @@
 
 function Mapper() {
+    this.swlat=this.nelat=this.swlng=this.nelng=undefined;
+    this.numPans = 0;
+    this.maxPans = 15;
     return this;
 }
 
@@ -69,10 +72,46 @@ Mapper.prototype.AddMarker = function(json, id) {
             position: position
         });
         this.markers[ukey] = marker;
+        google.maps.event.addListener(marker, 'click', function() {
+            window.open(json.url);
+        });
+        google.maps.event.addListener(marker, 'mouseover', function() {
+            $('p.row').each(function(key,val) {
+                $(this).removeClass('current-listing');
+            });
+            $($('p.row')[id]).addClass('current-listing').focus();
+            $($('p.row')[id]).children().focus();
+            //$('#sidebar-header').text(json.title);
+            //$('#sidebar-body').text(json.formatted_address);
+        });
     }
-    this.map.setCenter(position);
+    this.FitMarkerInMap(json, position);
     return marker;
 };
+
+Mapper.prototype.FitMarkerInMap = function(json, position) {
+    if (this.numPans > this.maxPans) {
+        return;
+    }
+    this.numPans++;
+    if (this.swlat === undefined || this.swlat < json.viewport.sw.lat) {
+        this.swlat = json.viewport.sw.lat;
+    }
+    if (this.nelat === undefined || this.nelat > json.viewport.ne.lat) {
+        this.nelat = json.viewport.ne.lat;
+    }
+    if (this.swlng === undefined || this.swlng > json.viewport.sw.lng) {
+        this.swlng = json.viewport.sw.lng;
+    }
+    if (this.nelng === undefined || this.nelng < json.viewport.ne.lng) {
+        this.nelng = json.viewport.ne.lng;
+    }
+    var sw = new google.maps.LatLng(this.swlat, this.swlng);
+    var ne = new google.maps.LatLng(this.nelat, this.nelng);
+    var viewport = new google.maps.LatLngBounds(sw, ne);
+    this.map.setCenter(position);
+    this.map.fitBounds(viewport);
+}
 
 Mapper.prototype.ClearMarkers = function() {
     for (var i in this.markers) {
@@ -87,7 +126,19 @@ window.GeocodingQueueCounter = 0;
 window.GeocodingQueue = new Array();
 
 function Controller() {
+    // backoff for geocaching api rate limiting
+    // default 0.2 seconds between requests
+    this.geocoderTimeout = 0.1;
     return this;
+}
+
+Controller.prototype.AddMarkersFromPage = function() {
+    this.ContinueGeocodingQueue();
+    var $ps = $('p.row');
+    for (var i = 0; i < $ps.length; i++) {
+        var $p = $($ps[i]);
+        this.GetHtml($p.find('a').attr('href'), i);
+    }
 }
 
 Controller.prototype.GetHtml = function(url, id) {
@@ -115,7 +166,6 @@ Controller.prototype.ParseHtml = function(content, url, id) {
                 url: url,
                 rowId: id
             }));
-            controller.ProcessGeocodingQueue();
         } else {
             mapper.AddMarker(JSON.parse(geocoded), id);
         }
@@ -155,22 +205,28 @@ Controller.prototype.ProcessGeocodingQueue = function() {
                         localStorage.setItem('address:'+job.address, JSON.stringify(json));
                     } catch(e) {
                         if (e.name === 'QUOTA_EXCEEDED_ERR') {
-                            console.warn('Quota exceeded when saving address: '+job.address);
+                            console.warn('localStorage quota exceeded when saving address: '+job.address);
                             controller.TrimStorage();
                             localStorage.setItem('address:'+job.address, JSON.stringify(json));
                         }
                     }
                     mapper.AddMarker(json, job.rowId);
                 } else {
-                    //console.warn('Geocoding "'+job.address+'" failed because: '+status);
-                    GeocodingQueue.push(JSON.stringify(job));
+                    if (status === google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+                        // only re-queue this job if we failed because of trying too fast
+                        //console.warn('Geocoding "'+job.address+'" failed because: '+status);
+                        controller.geocoderTimeout = controller.geocoderTimeout * 1.1;
+                        GeocodingQueue.unshift(JSON.stringify(job));
+                    } {
+                        console.warn('Geocoding "'+job.address+'" failed because: '+status);
+                    }
                 }
             });
         } else {
             mapper.AddMarker(JSON.parse(geocoded), job.rowId);
         }
     }
-    controller.SetGeocodingQueueTimeout();
+    controller.ContinueGeocodingQueue();
 }
 
 Controller.prototype.ParseAddress = function(html) {
@@ -191,8 +247,15 @@ Controller.prototype.TrimStorage = function() {
     }
 }
 
-Controller.prototype.SetGeocodingQueueTimeout = function() {
-    window.setTimeout(controller.ProcessGeocodingQueue, 0.1 * 1000);
+Controller.prototype.ContinueGeocodingQueue = function() {
+    //console.log('Geocoding Timeout: '+controller.geocoderTimeout);
+    if (controller.geocoderTimeout !== undefined) {
+        window.setTimeout(controller.ProcessGeocodingQueue, Math.ceil(controller.geocoderTimeout * 1000));
+    }
+}
+
+Controller.prototype.StopGeocodingQueue = function() {
+    controller.geocoderTimeout = undefined;
 }
 
 window.controller = new Controller();
@@ -205,7 +268,7 @@ function HandleCreateMap() {
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     });
-    controller.AddMarkerFromPost();
+    controller.AddMarkersFromPage();
 }
 
 mapper.CreateMap('HandleCreateMap');

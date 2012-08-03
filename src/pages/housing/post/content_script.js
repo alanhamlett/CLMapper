@@ -5,14 +5,16 @@ function Controller() {
 
 Controller.prototype.Initialize = function() {
 
-    // Chrome pattern matching is too basic (and chrome web store has bugs)
-    // so check if we really want to run the extension here
+    // Chrome pattern matching is too basic
+    // so do more fine grain matching here
     var currentUrl = window.location.href;
     if (currentUrl !== undefined) {
-        if (/\/\d+\.html$/.test(currentUrl)) { // single post
+        if (/\/\d+\.html$/.test(currentUrl)) {
+            // single post
             // noop until pages/hhh/post.js is finished
-        } else { // not a single post so hopefully a list of posts
-            this.SetupSidebar();
+        } else {
+            // not a single post so hopefully a list of posts
+            this.
             //this.RemoveSearch();
             this.StartPageScript('pages/hhh/index.js');
         }
@@ -38,6 +40,6 @@ Controller.prototype.StartPageScript = function(file) {
     Page.LoadScript(chrome.extension.getURL(file));
 }
 
-var controller = new Controller();
-controller.Initialize();
+//var controller = new Controller();
+//controller.Initialize();
 
