@@ -31,6 +31,7 @@
             "js": [
                 "libs/jquery.js",
                 "libs/PageInterface.js",
+                "libs/Geocoder.js",
                 "pages/housing/index/content_script.js",
                 "main.js"
             ],
@@ -38,15 +39,15 @@
         }
     ],
     "web_accessible_resources": [
-        "pages/housing/index/map.js",
-        "pages/housing/index/page_script.js",
         "pages/housing/index/bootstrap.css",
-        "pages/housing/index/page_style.css"
+        "pages/housing/index/page_style.css",
+        "pages/housing/index/map.js",
+        "pages/housing/index/page_script.js"
     ],
     "icons": {
         "16": "icons/icon16.png",
         "48": "icons/icon48.png",
         "128": "icons/icon128.png"
     },
-    "permissions": [ "*://*.craigslist.org/*", "*://*.craigslist.com/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.com.sg/*", "*://*.craigslist.com.tw/*", "*://*.craigslist.com.tr/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.com.pe/*", "*://*.craigslist.com.cn/*", "*://*.craigslist.com.au/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.co.in/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.co.za/*", "*://*.craigslist.ca/*", "*://*.craigslist.hk/*", "*://*.craigslist.jp/*", "*://*.craigslist.at/*", "*://*.craigslist.be/*", "*://*.craigslist.dk/*", "*://*.craigslist.fi/*", "*://*.craigslist.fr/*", "*://*.craigslist.de/*", "*://*.craigslist.gr/*", "*://*.craigslist.it/*", "*://*.craigslist.pl/*", "*://*.craigslist.pt/*", "*://*.craigslist.es/*", "*://*.craigslist.se/*", "*://*.craigslist.ch/*", "*://*.craigslist.tr/*" ]
+    "permissions": [ "http://maps.googleapis.com/", "*://*.craigslist.org/*", "*://*.craigslist.com/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.com.sg/*", "*://*.craigslist.com.tw/*", "*://*.craigslist.com.tr/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.com.pe/*", "*://*.craigslist.com.cn/*", "*://*.craigslist.com.au/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.co.in/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.co.za/*", "*://*.craigslist.ca/*", "*://*.craigslist.hk/*", "*://*.craigslist.jp/*", "*://*.craigslist.at/*", "*://*.craigslist.be/*", "*://*.craigslist.dk/*", "*://*.craigslist.fi/*", "*://*.craigslist.fr/*", "*://*.craigslist.de/*", "*://*.craigslist.gr/*", "*://*.craigslist.it/*", "*://*.craigslist.pl/*", "*://*.craigslist.pt/*", "*://*.craigslist.es/*", "*://*.craigslist.se/*", "*://*.craigslist.ch/*", "*://*.craigslist.tr/*" ]
 }
