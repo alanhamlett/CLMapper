@@ -5,7 +5,7 @@
     "description": "Craigslist posts shown on a map.",
     "content_scripts": [
         {
-            "matches": [ "*://*.craigslist.org/*", "*://*.craigslist.com/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.com.sg/*", "*://*.craigslist.com.tw/*", "*://*.craigslist.com.tr/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.com.pe/*", "*://*.craigslist.com.cn/*", "*://*.craigslist.com.au/*", "*://*.craigslist.com.ph/*", "*://*.craigslist.co.in/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.co.za/*", "*://*.craigslist.ca/*", "*://*.craigslist.hk/*", "*://*.craigslist.jp/*", "*://*.craigslist.at/*", "*://*.craigslist.be/*", "*://*.craigslist.dk/*", "*://*.craigslist.fi/*", "*://*.craigslist.fr/*", "*://*.craigslist.de/*", "*://*.craigslist.gr/*", "*://*.craigslist.it/*", "*://*.craigslist.pl/*", "*://*.craigslist.pt/*", "*://*.craigslist.es/*", "*://*.craigslist.se/*", "*://*.craigslist.ch/*", "*://*.craigslist.tr/*" ],
+            "matches": [ "*://*.craigslist.org/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.ca/*" ],
             "include_globs": [ "*/hhh*", "*/apa*", "*/roo*", "*/sub*", "*/hsw*", "*/swp*", "*/vac*", "*/prk*", "*/off*", "*/rea*", "*/aap*", "*/abo*", "*/nfb*", "*/fee*", "*/nfa*", "*/aiv*" ],
             "exclude_matches": [
                 "*://www.craigslist.org/*",
@@ -32,5 +32,5 @@
         "48": "icons/icon48.png",
         "128": "icons/icon128.png"
     },
-    "permissions": [ "http://maps.googleapis.com/", "*://*.craigslist.org/", "*://*.craigslist.com/", "*://*.craigslist.com.ph/", "*://*.craigslist.com.sg/", "*://*.craigslist.com.tw/", "*://*.craigslist.com.tr/", "*://*.craigslist.com.mx/", "*://*.craigslist.com.pe/", "*://*.craigslist.com.cn/", "*://*.craigslist.com.au/", "*://*.craigslist.com.ph/", "*://*.craigslist.co.in/", "*://*.craigslist.co.uk/", "*://*.craigslist.co.za/", "*://*.craigslist.ca/", "*://*.craigslist.hk/", "*://*.craigslist.jp/", "*://*.craigslist.at/", "*://*.craigslist.be/", "*://*.craigslist.dk/", "*://*.craigslist.fi/", "*://*.craigslist.fr/", "*://*.craigslist.de/", "*://*.craigslist.gr/", "*://*.craigslist.it/", "*://*.craigslist.pl/", "*://*.craigslist.pt/", "*://*.craigslist.es/", "*://*.craigslist.se/", "*://*.craigslist.ch/", "*://*.craigslist.tr/" ]
+    "permissions": [ "http://maps.googleapis.com/", "*://*.craigslist.org/", "*://*.craigslist.com.mx/", "*://*.craigslist.co.uk/", "*://*.craigslist.ca/" ]
 }
