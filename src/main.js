@@ -1,6 +1,6 @@
 
 function Controller() {
-    window.pageInterface = new PageInterface();
+
     // Chrome pattern matching is too basic
     // so do more fine grain matching here
     var currentUrl = window.location.href;

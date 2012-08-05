@@ -72,8 +72,8 @@ Mapper.prototype.GetMarkers = function() {
 }
 
 Mapper.prototype.AddMarker = function(json) {
-    var position = new google.maps.LatLng(json.lat, json.lng);
-    var ukey = json.lat+','+json.lng;
+    var position = new google.maps.LatLng(json.address.lat, json.address.lng);
+    var ukey = json.address.lat+','+json.address.lng;
     if (this.markers[ukey] === undefined) {
         var marker = new google.maps.Marker({
             map: this.map,
@@ -81,19 +81,19 @@ Mapper.prototype.AddMarker = function(json) {
         });
         this.markers[ukey] = marker;
         google.maps.event.addListener(marker, 'click', function() {
-            window.open(json.url);
+            window.open(json.marker.url);
         });
         google.maps.event.addListener(marker, 'mouseover', function() {
             $('p.row').each(function(key,val) {
                 $(this).removeClass('current-listing');
             });
-            $($('p.row')[json.id]).addClass('current-listing').focus();
-            $($('p.row')[json.id]).children().focus();
-            //$('#sidebar-header').text(json.title);
-            //$('#sidebar-body').text(json.formatted_address);
+            $($('p.row')[json.marker.rowNum]).addClass('current-listing').focus();
+            $($('p.row')[json.marker.rowNum]).children().focus();
+            //$('#sidebar-header').text(json.marker.title);
+            //$('#sidebar-body').text(json.address.formatted_address);
         });
     }
-    this.FitMarkerInMap(json, position);
+    this.FitMarkerInMap(json.address, position);
     return marker;
 }
 

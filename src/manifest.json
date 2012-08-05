@@ -13,6 +13,7 @@
             ],
             "js": [
                 "libs/jquery.js",
+                "libs/lscache.js",
                 "libs/PageInterface.js",
                 "libs/Geocoder.js",
                 "pages/housing/index/content_script.js",
@@ -24,7 +25,6 @@
     "web_accessible_resources": [
         "pages/housing/index/bootstrap.css",
         "pages/housing/index/page_style.css",
-        "pages/housing/index/map.js",
         "pages/housing/index/page_script.js"
     ],
     "icons": {

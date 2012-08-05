@@ -1,16 +1,15 @@
 
 function HousingIndex() {
-    this.SetupGeocoder();
+    this.postCacheDays = 50;
     this.SetupCSS();
     this.SetupSidebar();
-    this.WaitForMap();
     this.SetupMap();
     return this;
 }
 
 HousingIndex.prototype.SetupCSS = function() {
-    pageInterface.LoadCSS('pages/housing/index/bootstrap.css');
-    pageInterface.LoadCSS('pages/housing/index/page_style.css');
+    PageInterface.LoadCSS('pages/housing/index/bootstrap.css');
+    PageInterface.LoadCSS('pages/housing/index/page_style.css');
 }
 
 HousingIndex.prototype.SetupSidebar = function() {
@@ -24,14 +23,8 @@ HousingIndex.prototype.SetupSidebar = function() {
 }
 
 HousingIndex.prototype.SetupMap = function() {
-    pageInterface.LoadJS('pages/housing/index/page_script.js');
-}
 
-HousingIndex.prototype.SetupGeocoder = function() {
-    this.geocoder = new Geocoder();
-}
-
-HousingIndex.prototype.WaitForMap = function() {
+    // setup listener to handle MapReady message
     window.addEventListener('message', $.proxy(function(event) {
         if (event.source !== window) {
             return;
@@ -40,6 +33,9 @@ HousingIndex.prototype.WaitForMap = function() {
             this.AddMarkersFromPage();
         }
     }, this));
+    
+    // load map on page
+    PageInterface.LoadJS('pages/housing/index/page_script.js');
 }
 
 HousingIndex.prototype.AddMarkersFromPage = function() {
@@ -50,43 +46,41 @@ HousingIndex.prototype.AddMarkersFromPage = function() {
     }
 }
 
-HousingIndex.prototype.GetHtml = function(url, id) {
+HousingIndex.prototype.GetHtml = function(url, rowNum) {
     $.ajax({
         url: url,
         type: 'GET',
         dataType: 'text',
         success: $.proxy(function(data) {
-            this.ProcessHtml(data, url, id);
+            this.ProcessHtml(data, url, rowNum);
         }, this)
     });
 }
 
-HousingIndex.prototype.ProcessHtml = function(content, url, id) {
+HousingIndex.prototype.ProcessHtml = function(content, url, rowNum) {
     var address = this.GetAddressFromHtml(content);
     if (address !== undefined) {
-        var geocoded = localStorage.getItem('address:'+address);
+        var geocoded = lscache.get('address:'+address);
+        var markerData = {
+            rowNum: rowNum,
+            url: url
+        };
         if (geocoded === null) {
             var data = {
                 address: address,
-                url: url,
-                id: id
+                url: url
             };
-            this.geocoder.Geocode(data, $.proxy(function(result) {
+            Geocoder.geocode(data, $.proxy(function(result) {
+                delete result['url'];
                 this.SaveAddress(result);
-                this.AddMarker(result);
+                this.AddMarker(result, markerData);
             }, this));
         } else {
-            try {
-                var json = JSON.parse(geocoded);
-                json['id'] = id;
-                json['url'] = url;
-                this.AddMarker(json);
-            } catch (e) {
-                console.warn('Invalid JSON from localStorage: '+geocoded);
-            }
+            this.SaveAddress(geocoded);
+            this.AddMarker(geocoded, markerData);
         }
     } else {
-        //console.warn('Address is undefined from url: '+url);
+        //console.warn('Could not find address for post: '+url);
     }
 }
 
@@ -103,24 +97,15 @@ HousingIndex.prototype.GetAddressFromHtml = function(html) {
 }
 
 HousingIndex.prototype.SaveAddress = function(data) {
+    lscache.set('address:'+data.address, data, this.postCacheDays * 1440);
+}
+
+HousingIndex.prototype.AddMarker = function(addressData, markerData) {
     try {
-        localStorage.setItem('address:'+data.address, JSON.stringify(data));
-    } catch(e) {
-        if (e.name === 'QUOTA_EXCEEDED_ERR') {
-            console.warn('localStorage quota exceeded when saving address: '+data.address);
-            this.TrimStorage();
-            localStorage.setItem('address:'+data.address, JSON.stringify(data));
-        }
-    }
-}
-
-HousingIndex.prototype.AddMarker = function(data) {
-    window.postMessage({ type: 'AddMarker', data: JSON.stringify(data) }, '*');
-}
-
-HousingIndex.prototype.TrimStorage = function() {
-    if (localStorage.length > 0) {
-        localStorage.removeItem(localStorage.key(0));
+        window.postMessage({ type: 'AddMarker', data: JSON.stringify({address: addressData, marker: markerData}) }, '*');
+        return true;
+    } catch (e) {
+        return false;
     }
 }
 
