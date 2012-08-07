@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>CLMapper - Options</title>
+        <link href="options.css" type="text/css" rel="stylesheet" />
+        <script src="/libs/lscache.js" type="text/javascript"></script>
+        <script src="options.js" type="text/javascript"></script>
+    </head>
+    <body>
+
+        <div id="header"><h1>CLMapper Extension Options</h1></div>
+
+        <form name="settings">
+            <div class="settings-content">
+                <table class="settings-table">
+                    <tr>
+                        <th class="left">Some Setting</th>
+                        <td class="right">
+                            <input type="checkbox" name="some_setting" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+
+        <div id="footer">
+            <button id="save-button" style="font-weight:bold" onclick="save()">Save</button>
+            <span id="status" style="margin-left: 10px; color: #0e5ecf; font-weight:bold;"></span>
+        </div>
+    </body>
+</html>

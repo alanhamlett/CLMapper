@@ -1,8 +1,9 @@
 
 function HousingIndex() {
-    this.postCacheDays = 50;
+    this.postCacheDays = 7;
     this.SetupCSS();
     this.SetupSidebar();
+    this.SetupDonateButton();
     this.SetupMap();
     return this;
 }
@@ -13,16 +14,23 @@ HousingIndex.prototype.SetupCSS = function() {
 }
 
 HousingIndex.prototype.SetupSidebar = function() {
-    $('body > *').wrapAll('<div class="row-fluid"><div id="listings" class="span6"></div></div>');
+    $('body > *').wrapAll('<div><div id="listings"></div></div>');
     var $sidebar = $(
-        '<div id="right-side" class="span6"><div class="row-fluid">' +
-        '<div id="sidebar" class="span6"><div id="sidebar-map"></div></div>' +
-        '</div></div>'
+        '<div id="sidebar">' +
+        '<div id="sidebar-map"></div>' +
+        '</div>'
     ).insertAfter('#listings');
     $('#listings blockquote:first').addClass('blockquote-first');
 }
 
+HousingIndex.prototype.SetupDonateButton = function() {
+    $('<a id="donate-link" href="https://www.wepay.com/donations/clmapper"><img src="'+chrome.extension.getURL('images/donate-green.png')+'" border="0" title="Keep the features rollin, donate!" /></a>').insertAfter('#listings');
+}
+
 HousingIndex.prototype.SetupMap = function() {
+    
+    // save location of marker icons
+    lscache.set('ext_base_dir', chrome.extension.getURL('/'));
 
     // setup listener to handle MapReady message
     window.addEventListener('message', $.proxy(function(event) {
@@ -30,6 +38,18 @@ HousingIndex.prototype.SetupMap = function() {
             return;
         }
         if (event.data.type && event.data.type === 'MapReady') {
+            this.AddMarkersFromPage();
+        }
+    }, this));
+    
+    // setup listener to handle UpdateAddress message
+    window.addEventListener('message', $.proxy(function(event) {
+        if (event.source !== window) {
+            return;
+        }
+        if (event.data.type && event.data.type === 'UpdateAddress') {
+            var data = event.data.data;
+            lscache.set('address:'+data.address, data);
             this.AddMarkersFromPage();
         }
     }, this));

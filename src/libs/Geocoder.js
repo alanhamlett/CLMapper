@@ -33,7 +33,6 @@ var Geocoder = function() {
                             data['lat'] = json.results[0].geometry.location.lat;
                             data['lng'] = json.results[0].geometry.location.lng;
                             data['formatted_address'] = json.results[0].formatted_address;
-                            data['viewport'] = json.results[0].geometry.viewport;
                             successCallback(data);
                         } else {
                             console.warn('Geocoding API error: '+json.status);
