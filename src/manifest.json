@@ -1,6 +1,6 @@
 {
     "name": "CLMapper",
-    "version": "1.2.1.0",
+    "version": "1.2.1.1",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
     "content_scripts": [
@@ -26,8 +26,12 @@
         "pages/housing/index/bootstrap.css",
         "pages/housing/index/page_style.css",
         "pages/housing/index/page_script.js",
+        "libs/bootstrap/bootstrap-collapse.js",
         "images/marker-normal.png",
-        "images/marker-visited.png",
+        "images/marker-normal-visited.png",
+        "images/marker-fee.png",
+        "images/marker-fee-visited.png",
+        "images/marker-blank.png",
         "images/marker-shadow.png",
         "images/donate-green.png"
     ],

@@ -27,22 +27,22 @@ function HandleCreateMap() {
 
 Mapper.prototype.SetupMarkers = function() {
     this.markers = {};
-    this.markerIconNormal = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal.png');
-    this.markerIconVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-visited.png');
-    this.markerIconShadow = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-shadow.png');
-    google.maps.Marker.prototype.markerIconNormal = this.markerIconNormal;
-    google.maps.Marker.prototype.markerIconVisited = this.markerIconVisited;
-    google.maps.Marker.prototype.markerIconShadow = this.markerIconShadow;
-    google.maps.Marker.prototype.HighlightMarker = function(data) {
-        data['visited'] = true;
-        window.postMessage({ type: 'UpdateAddress', data: data }, '*');
-        this.setIcon(this.markerIconVisited);
+    this.markerNormal = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal.png');
+    this.markerFee = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee.png');
+    var markerNormalVisited = this.markerNormalVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal-visited.png');
+    var markerFeeVisited = this.markerFeeVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee-visited.png');
+    this.markerShadow = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-shadow.png');
+    google.maps.Marker.prototype.HighlightMarker = function() {
+        if (this.address.visited !== true) {
+            this.address['visited'] = true;
+            window.postMessage({ type: 'UpdateAddress', data: this.address }, '*');
+        }
+        if (this.fee) {
+            this.setIcon(markerFeeVisited);
+        } else {
+            this.setIcon(markerNormalVisited);
+        }
     };
-    google.maps.Marker.prototype.UnHighlightMarker = function(data) {
-        data['visited'] = false;
-        window.postMessage({ type: 'UpdateAddress', data: data }, '*');
-        this.setIcon(this.markerIconNormal);
-    }
     window.addEventListener('message', function(event) {
         if (event.source !== window) {
             return;
@@ -62,13 +62,6 @@ Mapper.prototype.HighlightMarker = function(key) {
     var marker = this.GetMarker(key);
     if (marker !== undefined) {
         marker.HighlightMarker();
-    }
-}
-
-Mapper.prototype.UnHighlightMarker = function(key) {
-    var marker = this.GetMarker(key);
-    if (marker !== undefined) {
-        marker.UnHighlightMarker();
     }
 }
 
@@ -97,25 +90,36 @@ Mapper.prototype.GetMarkers = function() {
 Mapper.prototype.AddMarker = function(json) {
     var position = new google.maps.LatLng(json.address.lat, json.address.lng);
     var ukey = json.address.lat+','+json.address.lng;
-    var icon = json.address.visited ? this.markerIconVisited : this.markerIconNormal;
+    var icon = this.markerNormal;
+    var fee = false;
+    if (json.item.cat === 'fee' || json.item.cat === 'aiv') {
+        icon = this.markerFee;
+        fee = true;
+    }
     if (this.markers[ukey] === undefined) {
         var marker = new google.maps.Marker({
             map: this.map,
             icon: icon,
-            shadow: this.markerIconShadow,
+            shadow: this.markerShadow,
             position: position
         });
+        marker['address'] = json.address;
+        marker['item'] = json.item;
+        marker['fee'] = fee;
+        if (json.address.visited)
+            marker.HighlightMarker();
         this.markers[ukey] = marker;
+        var $this = this;
         google.maps.event.addListener(marker, 'click', function() {
-            this.HighlightMarker(json.address);
-            window.open(json.marker.url);
+            this.HighlightMarker();
+            window.open(json.item.url);
         });
         google.maps.event.addListener(marker, 'mouseover', function() {
             $('p.row').each(function(key,val) {
                 $(this).removeClass('current-listing');
             });
-            $($('p.row')[json.marker.rowNum]).addClass('current-listing');
-            $($('p.row')[json.marker.rowNum]).children().focus();
+            $($('p.row')[json.item.row]).addClass('current-listing');
+            $($('p.row')[json.item.row]).children().focus();
         });
     }
     this.FitMarkerInMap(json.address);

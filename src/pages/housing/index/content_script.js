@@ -1,10 +1,12 @@
 
 function HousingIndex() {
     this.postCacheDays = 7;
+
     this.SetupCSS();
     this.SetupSidebar();
     this.SetupDonateButton();
     this.SetupMap();
+    
     return this;
 }
 
@@ -59,48 +61,59 @@ HousingIndex.prototype.SetupMap = function() {
 }
 
 HousingIndex.prototype.AddMarkersFromPage = function() {
+    var pattern = /(\d+)\.html$/;
     var $ps = $('p.row');
-    for (var i = 0; i < $ps.length; i++) {
-        var $p = $($ps[i]);
-        this.GetHtml($p.find('a').attr('href'), i);
+    for (var row = 0; row < $ps.length; row++) {
+        var url = $($ps[row]).find('a').attr('href');
+        if (url) {
+            var category = url.split('/');
+            var id = category.pop();
+            category = category.pop();
+            id = id.replace(pattern, '$1');
+            var item = {
+                id: id,
+                cat: category,
+                url: url,
+                row: row
+            };
+            this.GetHtml(item);
+        } else {
+            console.warn('Could not find url from post link: '+row);
+        }
     }
 }
 
-HousingIndex.prototype.GetHtml = function(url, rowNum) {
+HousingIndex.prototype.GetHtml = function(item) {
     $.ajax({
-        url: url,
+        url: item.url,
         type: 'GET',
         dataType: 'text',
-        success: $.proxy(function(data) {
-            this.ProcessHtml(data, url, rowNum);
+        success: $.proxy(function(responseText) {
+            this.ProcessHtml(responseText, item);
         }, this)
     });
 }
 
-HousingIndex.prototype.ProcessHtml = function(content, url, rowNum) {
-    var address = this.GetAddressFromHtml(content);
+HousingIndex.prototype.ProcessHtml = function(responseText, item) {
+    var address = this.GetAddressFromHtml(responseText);
     if (address !== undefined) {
         var geocoded = lscache.get('address:'+address);
-        var markerData = {
-            rowNum: rowNum,
-            url: url
-        };
         if (geocoded === null) {
             var data = {
                 address: address,
-                url: url
+                url: item.url
             };
             Geocoder.geocode(data, $.proxy(function(result) {
                 delete result['url'];
                 this.SaveAddress(result);
-                this.AddMarker(result, markerData);
+                this.AddMarker(result, item);
             }, this));
         } else {
             this.SaveAddress(geocoded);
-            this.AddMarker(geocoded, markerData);
+            this.AddMarker(geocoded, item);
         }
     } else {
-        //console.warn('Could not find address for post: '+url);
+        //console.warn('Could not find address for post: '+item.url);
     }
 }
 
@@ -120,9 +133,9 @@ HousingIndex.prototype.SaveAddress = function(data) {
     lscache.set('address:'+data.address, data, this.postCacheDays * 1440);
 }
 
-HousingIndex.prototype.AddMarker = function(addressData, markerData) {
+HousingIndex.prototype.AddMarker = function(address, item) {
     try {
-        window.postMessage({ type: 'AddMarker', data: JSON.stringify({address: addressData, marker: markerData}) }, '*');
+        window.postMessage({ type: 'AddMarker', data: JSON.stringify({address: address, item: item}) }, '*');
         return true;
     } catch (e) {
         return false;
