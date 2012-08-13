@@ -1,6 +1,6 @@
 {
     "name": "CLMapper",
-    "version": "1.2.2.0",
+    "version": "1.2.2.1",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
     "content_scripts": [
