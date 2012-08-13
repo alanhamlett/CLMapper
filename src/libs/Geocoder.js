@@ -13,9 +13,10 @@ var Geocoder = function() {
         * Combines with data param for passing along defaults or metadata.
         * @param {Object} data
         * @param {Function} successCallback
+        * @param {Function} errorCallback
         * @param {number} numErrors
         */ 
-        geocode: function(data, successCallback, numErrors) {
+        geocode: function(data, successCallback, errorCallback, numErrors) {
             var url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address='+encodeURIComponent(data.address)
             $.ajax({
                 url: url,
@@ -27,7 +28,7 @@ var Geocoder = function() {
                         try {
                             json = JSON.parse(jqXHR.responseText);
                         } catch (e) {
-                            console.warn('Invalid JSON from Geocoding API: '+jqXHR.responseText);
+                            //console.warn('Invalid JSON from Geocoding API: '+jqXHR.responseText);
                         }
                         if (json && json.status === 'OK') {
                             data['lat'] = json.results[0].geometry.location.lat;
@@ -35,7 +36,6 @@ var Geocoder = function() {
                             data['formatted_address'] = json.results[0].formatted_address;
                             successCallback(data);
                         } else {
-                            console.warn('Geocoding API error: '+json.status);
                             if (json.status === 'OVER_QUERY_LIMIT') {
                                 if (numErrors === undefined)
                                     numErrors = 0;
@@ -44,12 +44,17 @@ var Geocoder = function() {
                                 //console.log('Trying again in '+timeout+' milliseconds');
                                 window.setTimeout(
                                     function() {
-                                        Geocoder.geocode(data, successCallback, numErrors);
+                                        Geocoder.geocode(data, successCallback, errorCallback, numErrors);
                                     },
                                     timeout
                                 );
+                            } else {
+                                //console.warn('Geocoding API error: '+json.status);
+                                errorCallback(json.status);
                             }
                         }
+                    } else {
+                        errorCallback('responseText is undefined');
                     }
                 }
             });

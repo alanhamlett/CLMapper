@@ -81,7 +81,7 @@ HousingIndex.prototype.AddMarkersFromPage = function() {
             };
             this.GetHtml(item);
         } else {
-            console.warn('Could not find url from post link: '+row);
+            //console.warn('Could not find url from post link: '+row);
             this.IncrementProgressBar();
         }
     }
@@ -110,12 +110,18 @@ HousingIndex.prototype.ProcessHtml = function(responseText, item) {
                 address: address,
                 url: item.url
             };
-            Geocoder.geocode(data, $.proxy(function(result) {
-                delete result['url'];
-                this.SaveAddress(result);
-                this.AddMarker(result, item);
-                this.IncrementProgressBar();
-            }, this));
+            Geocoder.geocode(
+                data,
+                $.proxy(function(result) {
+                    delete result['url'];
+                    this.SaveAddress(result);
+                    this.AddMarker(result, item);
+                    this.IncrementProgressBar();
+                }, this),
+                $.proxy(function(errorMsg) {
+                    this.IncrementProgressBar();
+                }, this)
+            );
         } else {
             this.SaveAddress(geocoded);
             this.AddMarker(geocoded, item);
