@@ -21,7 +21,6 @@ function HandleCreateMap() {
         zoom: 12,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     });
-    mapper.SetupProgressBar();
     mapper.SignalExtensionReady();
 }
 
@@ -51,11 +50,6 @@ Mapper.prototype.SetupMarkers = function() {
             mapper.AddMarker(JSON.parse(event.data.data));
         }
     });
-}
-
-Mapper.prototype.SetupProgressBar = function() {
-    //var $progressBar = $('<div class="progress" id="marker-progress"><div class="bar" style="width: 60%;"></div></div>');
-    //var google_logo = $('#sidebar-map > div');//a[title="Click to see this area on Google Maps"]');
 }
 
 Mapper.prototype.HighlightMarker = function(key) {

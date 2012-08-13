@@ -61,10 +61,12 @@ blockquote.blockquote-first fieldset {
 
 #marker-progress {
     position: fixed;
-    bottom: 100%;
-    left: 60%;
-    z-index: 2;
-    width: 30%;
+    margin-bottom: 0;
+    bottom: 1%;
+    left: 55%;
+    z-index: 9999;
+    width: 20%;
+    border: 2px solid black;
 }
 
 #donate-link {
@@ -77,3 +79,8 @@ blockquote.blockquote-first fieldset {
 #donate-link img {
     height: 28px;
 }
+
+#hoodtitle {
+    white-space: normal;
+}
+
