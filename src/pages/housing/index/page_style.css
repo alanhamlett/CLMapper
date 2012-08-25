@@ -1,4 +1,8 @@
 
+body {
+    overflow-y: hidden;
+}
+
 p.row < p {
     margin-right: auto;
     width: 100%;
@@ -10,6 +14,8 @@ p.row < p {
 
 #listings {
     width: 50%;
+    overflow-y: auto;
+    height: 100%;
 }
 
 #sidebar {
