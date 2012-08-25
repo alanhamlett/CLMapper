@@ -17,6 +17,7 @@
                 "libs/PageInterface.js",
                 "libs/Geocoder.js",
                 "pages/housing/index/content_script.js",
+                "pages/housing/post/content_script.js",
                 "main.js"
             ],
             "run_at": "document_end"
@@ -29,12 +30,13 @@
         "pages/housing/index/bootstrap.css",
         "pages/housing/index/page_style.css",
         "pages/housing/index/page_script.js",
+        "pages/housing/post/page_style.css",
         "libs/bootstrap/bootstrap-collapse.js",
         "images/marker-normal.png",
         "images/marker-normal-active.png",
         "images/marker-normal-visited.png",
         "images/marker-fee.png",
-        "images/marker-normal-active.png",
+        "images/marker-fee-active.png",
         "images/marker-fee-visited.png",
         "images/marker-blank.png",
         "images/marker-shadow.png",
