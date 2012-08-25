@@ -8,6 +8,12 @@ p.row < p {
     width: 100%;
 }
 
+p.row {
+    border-left: 1px solid white;
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+}
+
 #listings blockquote {
     margin-right: 0;
 }
@@ -51,6 +57,9 @@ blockquote.blockquote-first fieldset {
 
 .current-listing {
     background-color: #eee;
+    border-left: 1px solid black !important;
+    border-top: 1px solid black !important;
+    border-bottom: 1px solid black !important;
 }
 
 .zero-margin {

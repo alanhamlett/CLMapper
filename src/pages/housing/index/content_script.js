@@ -116,8 +116,11 @@ HousingIndex.prototype.HoverListing = function(url) {
 
 HousingIndex.prototype.ScrollToListing = function(url) {
     if (this.Listings[url] !== undefined) {
-        var top = this.Listings[url].$row.offset().top;
-        $('#listings').animate({scrollTop: (top - Math.floor($('#listings').height() / 2))}, 100);
+        var $listings = $('#listings');
+        var halfPageHeight = $listings.height() / -2;
+        $('#listings').animate({
+            scrollTop: Math.floor(this.Listings[url].$row.offset().top - $listings.offset().top + $listings.scrollTop() + halfPageHeight)
+        }, 100);
     }
 }
 
