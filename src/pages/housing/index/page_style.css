@@ -84,3 +84,10 @@ blockquote.blockquote-first fieldset {
     white-space: normal;
 }
 
+.favorite-icon {
+    position: relative;
+    top: 3px;
+    left: 2px;
+    cursor: pointer;
+}
+

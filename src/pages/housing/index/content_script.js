@@ -5,6 +5,8 @@ function HousingIndex() {
     this.SetupCSS();
     this.SetupSidebar();
     this.SetupDonateButton();
+    this.SetupListings();
+    this.SetupFavorites();
     this.SetupMap();
     
     return this;
@@ -51,9 +53,7 @@ HousingIndex.prototype.SetupMap = function() {
             return;
         }
         if (event.data.type && event.data.type === 'UpdateAddress') {
-            var data = event.data.data;
-            lscache.set('address:'+data.address, data);
-            this.AddMarkersFromPage();
+            lscache.set('address:'+event.data.data.address, event.data.data);
         }
     }, this));
     
@@ -61,14 +61,141 @@ HousingIndex.prototype.SetupMap = function() {
     PageInterface.LoadJS('pages/housing/index/page_script.js');
 }
 
+HousingIndex.prototype.SetupListings = function() {
+    var index = this;
+    
+    window.addEventListener('message', $.proxy(function(event) {
+        if (event.source !== window) {
+            return;
+        }
+        if (event.data.type && event.data.type === 'HoverListing') {
+            this.HoverListing(event.data.data.url);
+            this.ScrollToListing(event.data.data.url);
+        }
+    }, this));
+
+    $('p.row').hover(
+        function() {
+            var url = $(this).find('a').attr('href');
+            if (url) {
+                index.HoverListing(url);
+            } else {
+                console.warn('Could not find url for listing.');
+            }
+        },
+        function() {
+            index.HoverListing();
+        }
+    );
+    $('p.row > a').on('click', function(e) {
+        e.preventDefault();
+        var url = $(this).attr('href');
+        if (url) {
+            index.ClickListing(url);
+        } else {
+            console.warn('Could not find url for listing.');
+        }
+        return false;
+    });
+}
+
+HousingIndex.prototype.HoverListing = function(url) {
+    if (this.Listings !== undefined) {
+        if (this._active_listing !== undefined) {
+            this.Listings[this._active_listing].$row.removeClass('current-listing');
+        }
+        if (this.Listings[url] !== undefined) {
+            this._active_listing = url;
+            this.Listings[url].$row.addClass('current-listing');
+        }
+        try {
+            window.postMessage({ type: 'HoverMarker', data: {url: url} }, '*');
+        } catch (e) { }
+    }
+}
+
+HousingIndex.prototype.ScrollToListing = function(url) {
+    if (this.Listings[url] !== undefined) {
+        var top = this.Listings[url].$row.offset().top;
+        $('html,body').animate({scrollTop: (top - Math.floor($(window.top).height() / 2))}, 100);
+    }
+}
+
+HousingIndex.prototype.ClickListing = function(url) {
+    try {
+        window.postMessage({ type: 'ClickMarker', data: {url: url} }, '*');
+    } catch (e) { }
+    window.open(url);
+}
+
+HousingIndex.prototype.SetupFavorites = function() {
+    var $ps = $('p.row');
+    for (var row = 0; row < $ps.length; row++) {
+        var url = $($ps[row]).find('a').attr('href');
+        if (url) {
+            this.AddStarIcon($($ps[row]), url);
+        }
+    }
+    var index = this;
+    $('img.favorite-icon').on('click', function() {
+        index.ToggleFavorite($(this));
+    });
+}
+
+HousingIndex.prototype.ToggleFavorite = function($icon) {
+    if ($icon.attr('url') && $icon.attr('favorite')) {
+        var url = $icon.attr('url');
+        var favorite = $icon.attr('favorite');
+        if (favorite === 'true') {
+            chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
+                if (response.success) {
+                    $icon.attr('src', chrome.extension.getURL('images/star-empty.png'));
+                    $icon.attr('favorite', 'false');
+                } else {
+                    $icon.attr('src', chrome.extension.getURL('images/star.png'));
+                    $icon.attr('favorite', 'true');
+                }
+            }, this));
+        } else if (favorite === 'false') {
+            chrome.extension.sendMessage({type: 'AddFavorite', url: url}, $.proxy(function(response) {
+                if (response.success) {
+                    $icon.attr('src', chrome.extension.getURL('images/star.png'));
+                    $icon.attr('favorite', 'true');
+                } else {
+                    $icon.attr('src', chrome.extension.getURL('images/star-empty.png'));
+                    $icon.attr('favorite', 'false');
+                }
+            }, this));
+        }
+    }
+}
+
+HousingIndex.prototype.AddStarIcon = function($row, url) {
+    var $starIcon = $('<img class="favorite-icon" url="'+url+'"/>');
+    $row.prepend($starIcon);
+    chrome.extension.sendMessage({type: 'GetFavorites', url: url}, $.proxy(function(response) {
+        if (response.value['fav:'+url]) {
+            $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
+            $starIcon.attr('favorite', 'true');
+        } else {
+            $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
+            $starIcon.attr('favorite', 'false');
+        }
+    }, this));
+}
+
 HousingIndex.prototype.AddMarkersFromPage = function() {
     var pattern = /(\d+)\.html$/;
     var $ps = $('p.row');
     this.TotalPosts = $ps.length;
     this.NumMarkersAdded = 0;
+    this.Listings = {};
     for (var row = 0; row < $ps.length; row++) {
         var url = $($ps[row]).find('a').attr('href');
         if (url) {
+            this.Listings[url] = {
+                $row: $($ps[row])
+            };
             var category = url.split('/');
             var id = category.pop();
             category = category.pop();
@@ -151,7 +278,7 @@ HousingIndex.prototype.SaveAddress = function(data) {
 
 HousingIndex.prototype.AddMarker = function(address, item) {
     try {
-        window.postMessage({ type: 'AddMarker', data: JSON.stringify({address: address, item: item}) }, '*');
+        window.postMessage({ type: 'AddMarker', data: {address: address, item: item} }, '*');
         return true;
     } catch (e) {
         return false;

@@ -28,50 +28,88 @@ Mapper.prototype.SetupMarkers = function() {
     this.markers = {};
     this.markerNormal = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal.png');
     this.markerFee = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee.png');
-    var markerNormalVisited = this.markerNormalVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal-visited.png');
-    var markerFeeVisited = this.markerFeeVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee-visited.png');
+    this.markerNormalActive = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal-active.png');
+    this.markerFeeActive = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee-active.png');
+    this.markerNormalVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-normal-visited.png');
+    this.markerFeeVisited = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-fee-visited.png');
     this.markerShadow = new google.maps.MarkerImage(localStorage.getItem('lscache-ext_base_dir')+'images/marker-shadow.png');
-    google.maps.Marker.prototype.HighlightMarker = function() {
-        if (this.address.visited !== true) {
-            this.address['visited'] = true;
-            window.postMessage({ type: 'UpdateAddress', data: this.address }, '*');
-        }
-        if (this.fee) {
-            this.setIcon(markerFeeVisited);
-        } else {
-            this.setIcon(markerNormalVisited);
-        }
-    };
     window.addEventListener('message', function(event) {
         if (event.source !== window) {
             return;
         }
-        if (event.data.type && event.data.type === 'AddMarker') {
-            mapper.AddMarker(JSON.parse(event.data.data));
+        if (event.data.type) {
+            if (event.data.type === 'AddMarker') {
+                mapper.AddMarker(event.data.data);
+            }
+            if (event.data.type === 'HoverMarker') {
+                mapper.HoverMarker(event.data.data.url);
+            }
+            if (event.data.type === 'ClickMarker') {
+                mapper.ClickMarker(event.data.data.url);
+            }
         }
     });
 }
 
-Mapper.prototype.HighlightMarker = function(key) {
-    var marker = this.GetMarker(key);
+Mapper.prototype.HoverMarker = function(url) {
+    if (this._active_marker !== undefined) {
+        this._active_marker['active'] = false;
+        this.UpdateIcon(this._active_marker);
+        this._active_marker = undefined;
+    }
+    var marker = this.GetMarker(url);
     if (marker !== undefined) {
-        marker.HighlightMarker();
+        marker['active'] = true;
+        this._active_marker = marker;
+        this.CenterMapOnMarker(marker);
+        this.UpdateIcon(marker);
     }
 }
 
-Mapper.prototype.GetMarker = function(key) {
-    if (name in this.markers) {
-        return this.markers[key];
+Mapper.prototype.ClickMarker = function(url) {
+    var marker = this.GetMarker(url);
+    if (marker !== undefined) {
+        if (marker.address.visited !== true) {
+            marker.address['visited'] = true;
+            window.postMessage({ type: 'UpdateAddress', data: marker.address }, '*');
+        }
+        this.UpdateIcon(marker);
+    }
+}
+
+Mapper.prototype.UpdateIcon = function(marker) {
+    if (marker.fee) {
+        if (marker.active) {
+            marker.setIcon(this.markerFeeActive);
+        } else if (marker.address.visited) {
+            marker.setIcon(this.markerFeeVisited);
+        } else {
+            marker.setIcon(this.markerFee);
+        }
+    } else {
+        if (marker.active) {
+            marker.setIcon(this.markerNormalActive);
+        } else if (marker.address.visited) {
+            marker.setIcon(this.markerNormalVisited);
+        } else {
+            marker.setIcon(this.markerNormal);
+        }
+    }
+}
+
+Mapper.prototype.GetMarker = function(url) {
+    if (url in this.markers) {
+        return this.markers[url];
     } else {
         return undefined;
     }
 }
 
-Mapper.prototype.DeleteMarker = function(key) {
-    var marker = this.GetMarker(key);
+Mapper.prototype.DeleteMarker = function(url) {
+    var marker = this.GetMarker(url);
     if (marker !== undefined) {
         marker.setMap(null);
-        return delete this.markers[key];
+        return delete this.markers[url];
     } else {
         return false;
     }
@@ -83,14 +121,13 @@ Mapper.prototype.GetMarkers = function() {
 
 Mapper.prototype.AddMarker = function(json) {
     var position = new google.maps.LatLng(json.address.lat, json.address.lng);
-    var ukey = json.address.lat+','+json.address.lng;
     var icon = this.markerNormal;
     var fee = false;
     if (json.item.cat === 'fee' || json.item.cat === 'aiv') {
         icon = this.markerFee;
         fee = true;
     }
-    if (this.markers[ukey] === undefined) {
+    if (this.markers[json.item.url] === undefined) {
         var marker = new google.maps.Marker({
             map: this.map,
             icon: icon,
@@ -100,23 +137,22 @@ Mapper.prototype.AddMarker = function(json) {
         marker['address'] = json.address;
         marker['item'] = json.item;
         marker['fee'] = fee;
-        if (json.address.visited)
-            marker.HighlightMarker();
-        this.markers[ukey] = marker;
+        this.markers[marker.item.url] = marker;
         var $this = this;
         google.maps.event.addListener(marker, 'click', function() {
-            this.HighlightMarker();
-            window.open(json.item.url);
+            $this.ClickMarker(this.item.url);
+            window.open(this.item.url);
         });
         google.maps.event.addListener(marker, 'mouseover', function() {
-            $('p.row').each(function(key,val) {
-                $(this).removeClass('current-listing');
-            });
-            $($('p.row')[json.item.row]).addClass('current-listing');
-            $($('p.row')[json.item.row]).children().focus();
+            window.postMessage({ type: 'HoverListing', data: { url: this.item.url } }, '*');
         });
+        google.maps.event.addListener(marker, 'mouseout', function() {
+            window.postMessage({ type: 'HoverListing', data: { url: undefined } }, '*');
+        });
+        if (marker.address.visited)
+            this.ClickMarker(marker.item.url);
     }
-    this.FitMarkerInMap(json.address);
+    this.FitMarkerInMap(marker.address);
     return marker;
 }
 
@@ -143,9 +179,14 @@ Mapper.prototype.FitMarkerInMap = function(json) {
     this.map.fitBounds(viewport);
 }
 
+Mapper.prototype.CenterMapOnMarker = function(marker) {
+    var viewport = new google.maps.LatLng(marker.lat, marker.lng);
+    //this.map.panTo(viewport);
+}
+
 Mapper.prototype.ClearMarkers = function() {
-    for (var i in this.markers) {
-        this.markers[i].setMap(null);
+    for (var url in this.markers) {
+        this.markers[url].setMap(null);
     }
     this.markers = {};
 }
