@@ -24,22 +24,20 @@ HousingPost.prototype.ToggleFavorite = function($icon) {
         var favorite = $icon.attr('favorite');
         if (favorite === 'true') {
             chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
-                if (response.success) {
+                if (!response.error) {
                     $icon.attr('src', chrome.extension.getURL('images/star-empty.png'));
                     $icon.attr('favorite', 'false');
                 } else {
-                    $icon.attr('src', chrome.extension.getURL('images/star.png'));
-                    $icon.attr('favorite', 'true');
+                    console.warn(response.error);
                 }
             }, this));
         } else if (favorite === 'false') {
             chrome.extension.sendMessage({type: 'AddFavorite', url: url}, $.proxy(function(response) {
-                if (response.success) {
+                if (!response.error) {
                     $icon.attr('src', chrome.extension.getURL('images/star.png'));
                     $icon.attr('favorite', 'true');
                 } else {
-                    $icon.attr('src', chrome.extension.getURL('images/star-empty.png'));
-                    $icon.attr('favorite', 'false');
+                    console.warn(response.error);
                 }
             }, this));
         }
@@ -49,13 +47,17 @@ HousingPost.prototype.ToggleFavorite = function($icon) {
 HousingPost.prototype.AddStarIcon = function(url) {
     var $starIcon = $('<img class="favorite-icon" url="'+url+'"/>');
     $('h2:first').prepend($starIcon);
-    chrome.extension.sendMessage({type: 'GetFavorites', url: url}, $.proxy(function(response) {
-        if (response.value['fav:'+url]) {
-            $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
-            $starIcon.attr('favorite', 'true');
+    chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
+        if (!response.error) {
+            if (response.favorites[url]) {
+                $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
+                $starIcon.attr('favorite', 'true');
+            } else {
+                $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
+                $starIcon.attr('favorite', 'false');
+            }
         } else {
-            $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
-            $starIcon.attr('favorite', 'false');
+            console.warn(response.error);
         }
     }, this));
 }

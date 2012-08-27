@@ -26,12 +26,20 @@
     "background": {
         "scripts": ["background.js"]
     },
+    "browser_action": {
+        "default_icon": "images/icon16.png",
+        "default_title": "CLMapper",
+        "default_popup": "popup/popup.html"
+    },
     "web_accessible_resources": [
+        "popup/popup.html",
+        "popup/popup.css",
+        "popup/popup.js",
         "pages/housing/index/bootstrap.css",
         "pages/housing/index/page_style.css",
         "pages/housing/index/page_script.js",
         "pages/housing/post/page_style.css",
-        "libs/bootstrap/bootstrap-collapse.js",
+        "libs/bootstrap/js/bootstrap.min.js",
         "images/marker-normal.png",
         "images/marker-normal-active.png",
         "images/marker-normal-visited.png",
@@ -49,5 +57,6 @@
         "48": "images/icon48.png",
         "128": "images/icon128.png"
     },
+    "minimum_chrome_version": "20",
     "permissions": [ "storage", "http://maps.googleapis.com/", "*://*.craigslist.org/", "*://*.craigslist.com.mx/", "*://*.craigslist.co.uk/", "*://*.craigslist.ca/", "*://*.craigslist.de/", "*://*.craigslist.co.kr/", "*://*.craigslist.co.in/", "*://*.craigslist.se/", "*://*.craigslist.at/" ]
 }
