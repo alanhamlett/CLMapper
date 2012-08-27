@@ -11,9 +11,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                     for (var key in data) {
                         if (key.indexOf('fav:http') === 0) {
                             var url = key.replace(/^fav:/, '');
-                            favorites[url] = {
-                                title: url
-                            };
+                            favorites[url] = data[key];
                         }
                     }
                     sendResponse({favorites: favorites});
@@ -23,7 +21,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
         if (request.type === 'AddFavorite') {
             var key = 'fav:'+request.url;
             var keys = {};
-            keys[key] = true;
+            keys[key] = {
+                title: request.title
+            };
             chrome.storage.local.set(keys, function() {
                 if (chrome.extension.lastError) {
                     sendResponse({error: chrome.extension.lastError.message});

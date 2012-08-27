@@ -21,7 +21,7 @@ body {
 }
 
 #favorites {
-    width: 400px;
+    width: 600px;
     height: 400px;
     overflow-y: auto;
     overflow-x: hidden;

@@ -137,6 +137,7 @@ Mapper.prototype.AddMarker = function(json) {
         marker['address'] = json.address;
         marker['item'] = json.item;
         marker['fee'] = fee;
+        marker['title'] = json.title;
         this.markers[marker.item.url] = marker;
         var $this = this;
         google.maps.event.addListener(marker, 'click', function() {

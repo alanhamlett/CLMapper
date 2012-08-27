@@ -148,6 +148,7 @@ HousingIndex.prototype.SetupFavorites = function() {
 HousingIndex.prototype.ToggleFavorite = function($icon) {
     if ($icon.attr('url') && $icon.attr('favorite')) {
         var url = $icon.attr('url');
+        var title = $icon.attr('urltitle');
         var favorite = $icon.attr('favorite');
         if (favorite === 'true') {
             chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
@@ -159,7 +160,7 @@ HousingIndex.prototype.ToggleFavorite = function($icon) {
                 }
             }, this));
         } else if (favorite === 'false') {
-            chrome.extension.sendMessage({type: 'AddFavorite', url: url}, $.proxy(function(response) {
+            chrome.extension.sendMessage({type: 'AddFavorite', url: url, title: title}, $.proxy(function(response) {
                 if (!response.error) {
                     $icon.attr('src', chrome.extension.getURL('images/star.png'));
                     $icon.attr('favorite', 'true');
@@ -172,7 +173,9 @@ HousingIndex.prototype.ToggleFavorite = function($icon) {
 }
 
 HousingIndex.prototype.AddStarIcon = function($row, url) {
-    var $starIcon = $('<img class="favorite-icon" url="'+url+'"/>');
+    var $starIcon = $('<img class="favorite-icon" />');
+    $starIcon.attr('url', url);
+    $starIcon.attr('urltitle', $row.find('a:first').text());
     $row.prepend($starIcon);
     chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
         if (!response.error) {
@@ -235,7 +238,8 @@ HousingIndex.prototype.GetHtml = function(item) {
 
 HousingIndex.prototype.ProcessHtml = function(responseText, item) {
     var address = this.GetAddressFromHtml(responseText);
-    if (address !== undefined) {
+    var title = this.GetTitleFromHtml(responseText);
+    if (address && title) {
         var geocoded = lscache.get('address:'+address);
         if (geocoded === null) {
             var data = {
@@ -247,7 +251,7 @@ HousingIndex.prototype.ProcessHtml = function(responseText, item) {
                 $.proxy(function(result) {
                     delete result['url'];
                     this.SaveAddress(result);
-                    this.AddMarker(result, item);
+                    this.AddMarker(result, item, title);
                     this.IncrementProgressBar();
                 }, this),
                 $.proxy(function(errorMsg) {
@@ -256,13 +260,25 @@ HousingIndex.prototype.ProcessHtml = function(responseText, item) {
             );
         } else {
             this.SaveAddress(geocoded);
-            this.AddMarker(geocoded, item);
+            this.AddMarker(geocoded, item, title);
             this.IncrementProgressBar();
         }
     } else {
         //console.warn('Could not find address for post: '+item.url);
         this.IncrementProgressBar();
     }
+}
+
+HousingIndex.prototype.GetTitleFromHtml = function(html) {
+    var start = html.indexOf('<h2>');
+    if (start < 0) {
+        return undefined;
+    }
+    var text = html.substring(start+'<h2>'.length);
+    var end = text.indexOf('</h2>');
+    text = text.substring(0, end);
+    text = decodeURIComponent(text);
+    return text;
 }
 
 HousingIndex.prototype.GetAddressFromHtml = function(html) {
@@ -281,9 +297,9 @@ HousingIndex.prototype.SaveAddress = function(data) {
     lscache.set('address:'+data.address, data, this.postCacheDays * 1440);
 }
 
-HousingIndex.prototype.AddMarker = function(address, item) {
+HousingIndex.prototype.AddMarker = function(address, item, title) {
     try {
-        window.postMessage({ type: 'AddMarker', data: {address: address, item: item} }, '*');
+        window.postMessage({ type: 'AddMarker', data: {address: address, item: item, title: title} }, '*');
         return true;
     } catch (e) {
         return false;

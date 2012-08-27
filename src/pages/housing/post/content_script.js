@@ -21,6 +21,7 @@ HousingPost.prototype.SetupFavorites = function() {
 HousingPost.prototype.ToggleFavorite = function($icon) {
     if ($icon.attr('url') && $icon.attr('favorite')) {
         var url = window.location.href;
+        var title = $('h2:first').text();
         var favorite = $icon.attr('favorite');
         if (favorite === 'true') {
             chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
@@ -32,7 +33,7 @@ HousingPost.prototype.ToggleFavorite = function($icon) {
                 }
             }, this));
         } else if (favorite === 'false') {
-            chrome.extension.sendMessage({type: 'AddFavorite', url: url}, $.proxy(function(response) {
+            chrome.extension.sendMessage({type: 'AddFavorite', url: url, title: title}, $.proxy(function(response) {
                 if (!response.error) {
                     $icon.attr('src', chrome.extension.getURL('images/star.png'));
                     $icon.attr('favorite', 'true');
@@ -45,7 +46,8 @@ HousingPost.prototype.ToggleFavorite = function($icon) {
 }
 
 HousingPost.prototype.AddStarIcon = function(url) {
-    var $starIcon = $('<img class="favorite-icon" url="'+url+'"/>');
+    var $starIcon = $('<img class="favorite-icon" />');
+    $starIcon.attr('url', url);
     $('h2:first').prepend($starIcon);
     chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
         if (!response.error) {

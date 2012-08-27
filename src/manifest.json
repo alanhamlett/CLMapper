@@ -1,15 +1,16 @@
 {
     "name": "CLMapper",
-    "version": "1.3.5",
+    "version": "1.3.6",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
     "content_scripts": [
         {
             "matches": [ "*://*.craigslist.org/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.ca/*", "*://*.craigslist.de/*", "*://*.craigslist.co.kr/*", "*://*.craigslist.co.in/*", "*://*.craigslist.se/*", "*://*.craigslist.at/*" ],
-            "include_globs": [ "*/hhh*", "*/apa*", "*/roo*", "*/sub*", "*/hsw*", "*/swp*", "*/vac*", "*/prk*", "*/off*", "*/rea*", "*/aap*", "*/abo*", "*/nfb*", "*/fee*", "*/nfa*", "*/aiv*" ],
+            "include_globs": [ "*/hhh*", "*/apa*", "*/roo*", "*/sub*", "*/hsw*", "*/swp*", "*/vac*", "*/prk*", "*/off*", "*/rea*", "*/reb*", "*/aap*", "*/abo*", "*/nfb*", "*/fee*", "*/nfa*", "*/aiv*", "*/sha*", "*/reo*" ],
             "exclude_matches": [
                 "*://www.craigslist.org/*",
-                "*://craigslist.org/*"
+                "*://craigslist.org/*",
+                "*://*/feedback"
             ],
             "js": [
                 "libs/jquery.js",
