@@ -10,9 +10,9 @@ Craigslist posts shown on a map.
 
 ### Screenshots
 
-![screenshot01](https://github.com/alanhamlett/CLMapper/raw/master/images/screenshot01-1100x652.png)
+![screenshot01](https://github.com/alanhamlett/CLMapper/raw/master/images/ScreenShot01-1100x652.png)
 
-![screenshot04](https://github.com/alanhamlett/CLMapper/raw/master/images/screenshot04-1100x652.png)
+![screenshot04](https://github.com/alanhamlett/CLMapper/raw/master/images/ScreenShot04-1100x652.png)
 
 ## Getting Started Tutorial on Google
 
