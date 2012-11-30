@@ -270,27 +270,36 @@ HousingIndex.prototype.ProcessHtml = function(responseText, item) {
 }
 
 HousingIndex.prototype.GetTitleFromHtml = function(html) {
-    var start = html.indexOf('<h2>');
-    if (start < 0) {
+    try {
+        var start = html.indexOf('<h2 class="postingtitle">');
+        if (start < 0) {
+            return undefined;
+        }
+        var text = html.substring(start+'<h2 class="postingtitle">'.length);
+        var end = text.indexOf('</h2>');
+        text = text.substring(0, end);
+        text = text.replace(/%/g, '%25');
+        text = decodeURIComponent(text);
+        return text;
+    } catch (e) {
         return undefined;
     }
-    var text = html.substring(start+'<h2>'.length);
-    var end = text.indexOf('</h2>');
-    text = text.substring(0, end);
-    text = decodeURIComponent(text);
-    return text;
 }
 
 HousingIndex.prototype.GetAddressFromHtml = function(html) {
-    var start = html.indexOf('<a target="_blank" href="http://maps.google.com/?q=loc%3A+');
-    if (start < 0) {
+    try {
+        var start = html.indexOf('<a target="_blank" href="http://maps.google.com/?q=loc%3A+');
+        if (start < 0) {
+            return undefined;
+        }
+        var address = html.substring(start+'<a target="_blank" href="http://maps.google.com/?q=loc%3A+'.length);
+        var end = address.indexOf('"');
+        address = address.substring(0, end);
+        address = decodeURIComponent(address).replace(/\+/g, ' ');
+        return address;
+    } catch (e) {
         return undefined;
     }
-    var address = html.substring(start+'<a target="_blank" href="http://maps.google.com/?q=loc%3A+'.length);
-    var end = address.indexOf('"');
-    address = address.substring(0, end);
-    address = decodeURIComponent(address).replace(/\+/g, ' ');
-    return address;
 }
 
 HousingIndex.prototype.SaveAddress = function(data) {
