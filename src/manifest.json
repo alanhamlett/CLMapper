@@ -1,8 +1,9 @@
 {
     "name": "CLMapper",
-    "version": "1.3.6",
+    "version": "1.3.7",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
+    "homepage_url": "http://ahamlett.com",
     "content_scripts": [
         {
             "matches": [ "*://*.craigslist.org/*", "*://*.craigslist.com.mx/*", "*://*.craigslist.co.uk/*", "*://*.craigslist.ca/*", "*://*.craigslist.de/*", "*://*.craigslist.co.kr/*", "*://*.craigslist.co.in/*", "*://*.craigslist.se/*", "*://*.craigslist.at/*" ],
