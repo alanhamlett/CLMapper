@@ -47,24 +47,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 // open Craigslist housing page when extension is first installed
-if (chrome.runtime) {
-    chrome.runtime.onInstalled.addListener(function() {
-        chrome.tabs.create({url: 'http://www.craigslist.org/hhh/'});
-    });
-} else {
-    chrome.storage.local.get(function(data) {
-        if (chrome.extension.lastError) {
-            console.warn(chrome.extension.lastError.message);
-        } else {
-            if (!data['installed']) {
-                chrome.tabs.create({url: 'http://www.craigslist.org/hhh/'});
-                chrome.storage.local.set({installed: true}, function() {
-                    if (chrome.extension.lastError) {
-                        console.warn(chrome.extension.lastError.message);
-                    }
-                });
-            }
-        }
-    });
-}
-
+var installed = localStorage.getItem('installed');
+if (!installed)
+    chrome.tabs.create({url: 'http://www.craigslist.org/hhh/'});
+localStorage.setItem('installed', true);

@@ -8,7 +8,7 @@ function HousingIndex() {
     this.SetupListings();
     this.SetupFavorites();
     this.SetupMap();
-    
+
     return this;
 }
 
@@ -33,7 +33,7 @@ HousingIndex.prototype.SetupDonateButton = function() {
 }
 
 HousingIndex.prototype.SetupMap = function() {
-    
+
     // save location of marker icons
     lscache.set('ext_base_dir', chrome.extension.getURL('/'));
 
@@ -46,7 +46,7 @@ HousingIndex.prototype.SetupMap = function() {
             this.AddMarkersFromPage();
         }
     }, this));
-    
+
     // setup listener to handle UpdateAddress message
     window.addEventListener('message', $.proxy(function(event) {
         if (event.source !== window) {
@@ -56,14 +56,14 @@ HousingIndex.prototype.SetupMap = function() {
             lscache.set('address:'+event.data.data.address, event.data.data);
         }
     }, this));
-    
+
     // load map on page
     PageInterface.LoadJS('pages/housing/index/page_script.js');
 }
 
 HousingIndex.prototype.SetupListings = function() {
     var index = this;
-    
+
     window.addEventListener('message', $.proxy(function(event) {
         if (event.source !== window) {
             return;
@@ -134,10 +134,7 @@ HousingIndex.prototype.ClickListing = function(url) {
 HousingIndex.prototype.SetupFavorites = function() {
     var $ps = $('p.row');
     for (var row = 0; row < $ps.length; row++) {
-        var url = $($ps[row]).find('a').attr('href');
-        if (url) {
-            this.AddStarIcon($($ps[row]), url);
-        }
+        this.AddStarIcon($($ps[row]));
     }
     var index = this;
     $('img.favorite-icon').on('click', function() {
@@ -146,9 +143,9 @@ HousingIndex.prototype.SetupFavorites = function() {
 }
 
 HousingIndex.prototype.ToggleFavorite = function($icon) {
-    if ($icon.attr('url') && $icon.attr('favorite')) {
-        var url = $icon.attr('url');
-        var title = $icon.attr('urltitle');
+    if ($icon.attr('data-url') && $icon.attr('favorite')) {
+        var url = $icon.attr('data-url');
+        var title = $icon.attr('data-title');
         var favorite = $icon.attr('favorite');
         if (favorite === 'true') {
             chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
@@ -172,10 +169,21 @@ HousingIndex.prototype.ToggleFavorite = function($icon) {
     }
 }
 
-HousingIndex.prototype.AddStarIcon = function($row, url) {
+HousingIndex.prototype.AddStarIcon = function($row) {
+    var url = $row.find('a:first').prop('href');
+    var title = url;
+    $row.find('a').each(function() {
+        var $this = $(this);
+        if ($this.text()) {
+            url = $this.prop('href');
+            title = $this.text();
+            return false;
+        }
+        return true;
+    });
     var $starIcon = $('<img class="favorite-icon" />');
-    $starIcon.attr('url', url);
-    $starIcon.attr('urltitle', $row.find('a:first').text());
+    $starIcon.attr('data-url', url);
+    $starIcon.attr('data-title', title);
     $row.prepend($starIcon);
     chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
         if (!response.error) {

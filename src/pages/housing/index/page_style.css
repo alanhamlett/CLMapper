@@ -99,10 +99,11 @@ blockquote.blockquote-first fieldset {
     white-space: normal;
 }
 
-.favorite-icon {
+img.favorite-icon {
     position: relative;
     top: 3px;
     left: 2px;
     cursor: pointer;
+    margin-left: 10px;
 }
 
