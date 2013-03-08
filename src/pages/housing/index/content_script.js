@@ -1,7 +1,9 @@
 
 function HousingIndex() {
     this.postCacheDays = 7;
+    this.options = {};
 
+    this.SetupOptions();
     this.SetupCSS();
     this.SetupSidebar();
     this.SetupDonateButton();
@@ -30,6 +32,45 @@ HousingIndex.prototype.SetupSidebar = function() {
 
 HousingIndex.prototype.SetupDonateButton = function() {
     $('<a id="donate-link" href="https://www.wepay.com/donations/clmapper"><img src="'+chrome.extension.getURL('images/donate-green.png')+'" border="0" title="Keep the features rollin, donate!" /></a>').insertAfter('#listings');
+}
+
+HousingIndex.prototype.SetupOptions = function() {
+    var $elem = $('<div><span><input type="checkbox" name="autoscroll" checked="checked">Auto-Scroll to Listing</span></div>');
+    $elem.css({
+        'z-index': '2',
+        'font-family': 'Arial, sans-serif',
+        'font-size': '14px',
+        'color': 'rgb(68, 68, 68)',
+        'height': '22px',
+        'line-height': '19px',
+        'background-color': 'rgb(245, 245, 245)',
+        'border': '1px solid rgb(220, 220, 220)',
+        'padding': '0px',
+        'position': 'absolute',
+        'bottom': '24px',
+        'right': '0px',
+    });
+    $elem.find('input').css({
+        'position': 'relative',
+        'top': '2px',
+    });
+    $('body').append($elem);
+    chrome.extension.sendMessage({type: 'GetOptions'}, $.proxy(function(response) {
+        if (!response.error) {
+            HousingIndex.options = response.options;
+            $elem.find('input[name="autoscroll"]').prop('checked', response.options.autoscroll);
+        } else {
+            console.warn(response.error);
+        }
+    }, this));
+    $elem.find('input[name="autoscroll"]').click(function(e) {
+        HousingIndex.options.autoscroll = $(e.target).prop('checked');
+        chrome.extension.sendMessage({type: 'SetOptions', options: HousingIndex.options}, $.proxy(function(response) {
+            if (response.error) {
+                console.warn(response.error);
+            }
+        }, this));
+    });
 }
 
 HousingIndex.prototype.SetupMap = function() {
@@ -70,7 +111,8 @@ HousingIndex.prototype.SetupListings = function() {
         }
         if (event.data.type && event.data.type === 'HoverListing') {
             this.HoverListing(event.data.data.url);
-            this.ScrollToListing(event.data.data.url);
+            if (HousingIndex.options.autoscroll)
+                this.ScrollToListing(event.data.data.url);
         }
     }, this));
 

@@ -42,6 +42,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                 }
             });
         }
+        if (request.type === 'SetOptions') {
+            lscache.set('options', request.options);
+            sendResponse({});
+        }
+        if (request.type === 'GetOptions') {
+            var options = lscache.get('options');
+            if (!options) {
+                options = {
+                    'autoscroll': true,
+                };
+            }
+            sendResponse({options:options});
+        }
     }
     return true;
 });
