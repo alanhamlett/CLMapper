@@ -158,11 +158,8 @@ HousingIndex.prototype.HoverListing = function(url) {
 
 HousingIndex.prototype.ScrollToListing = function(url) {
     if (this.Listings[url] !== undefined) {
-        var $listings = $('#listings');
-        var halfPageHeight = $listings.height() / -2;
-        $('body').animate({
-            scrollTop: Math.floor(this.Listings[url].$row.offset().top - $listings.offset().top + $listings.scrollTop() + halfPageHeight)
-        }, 100);
+        window.my = this.Listings[url].$row;
+        $('body').scrollTo(this.Listings[url].$row);
     }
 }
 
