@@ -17,7 +17,7 @@ var Geocoder = function() {
         * @param {number} numErrors
         */ 
         geocode: function(data, successCallback, errorCallback, numErrors) {
-            var url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address='+encodeURIComponent(data.address)
+            var url = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=false&address='+encodeURIComponent(data.address)
             $.ajax({
                 url: url,
                 type: 'GET',
