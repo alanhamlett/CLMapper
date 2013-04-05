@@ -46,7 +46,7 @@ HousingIndex.prototype.SetupOptions = function() {
         'background-color': 'rgb(245, 245, 245)',
         'border': '1px solid rgb(220, 220, 220)',
         'padding': '0px',
-        'position': 'absolute',
+        'position': 'fixed',
         'bottom': '24px',
         'right': '0px',
     });
@@ -160,7 +160,7 @@ HousingIndex.prototype.ScrollToListing = function(url) {
     if (this.Listings[url] !== undefined) {
         var $listings = $('#listings');
         var halfPageHeight = $listings.height() / -2;
-        $('#listings').animate({
+        $('body').animate({
             scrollTop: Math.floor(this.Listings[url].$row.offset().top - $listings.offset().top + $listings.scrollTop() + halfPageHeight)
         }, 100);
     }
