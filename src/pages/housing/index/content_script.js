@@ -329,19 +329,40 @@ HousingIndex.prototype.GetTitleFromHtml = function(html) {
 }
 
 HousingIndex.prototype.GetAddressFromHtml = function(html) {
-    try {
+    //try {
+        var address;
         var start = html.indexOf('<a target="_blank" href="http://maps.google.com/?q=loc%3A+');
-        if (start < 0) {
-            return undefined;
+        if (start >= 0) {
+            address = html.substring(start+'<a target="_blank" href="http://maps.google.com/?q=loc%3A+'.length);
+            var end = address.indexOf('"');
+            address = address.substring(0, end);
+            address = decodeURIComponent(address).replace(/\+/g, ' ');
         }
-        var address = html.substring(start+'<a target="_blank" href="http://maps.google.com/?q=loc%3A+'.length);
-        var end = address.indexOf('"');
-        address = address.substring(0, end);
-        address = decodeURIComponent(address).replace(/\+/g, ' ');
+        if (!address)
+            address = this.ExtractAddressFromHtml(html);
         return address;
-    } catch (e) {
+    //} catch (e) {
+        console.log('exception');
+        console.log(e);
         return undefined;
+    //}
+}
+
+HousingIndex.prototype.ExtractAddressFromHtml = function(html) {
+    var states = 'Chicago|Houston|Philadelphia|Phoenix|Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|North Carolina|North Dakota|Nebraska|Nevada|New Hampshire|New Jersey|New Mexico|New York|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode Island|South Carolina|South Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West Virginia|Wisconsin|Wyoming|American Samoa|D\\.C\\.|Guam|Puerto Rico|AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NC|ND|NE|NV|NH|NJ|NM|NY|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|AS|DC|GU|MP|PR|VI';
+    var streets = 'Road|Rd\\.?|Square|Sq\\.?|Street|St\\.?|Parkway|Pkwy\\.?|Avenue|Ave\\.?|Broadway|Bdwy\\.?|Boulevard|Blvd\\.?|Lane|Ln\\.?|Terrace|Place|Pl\\.?|Gardens|Yard|Court|Ct\\.?|Way|Drive|Dr\\.?|lazy';
+    var texts = html.match(/>([^<]+)</g);
+    var regex = new RegExp('[\\n ]?(\\d+[\\n ,]+\\w+[\\n ,]+('+streets+')[\\n ,]+[\\w ,-]+('+states+'))', 'i');
+    if (texts !== null) {
+        for (var i=0; i<texts.length; i++) {
+            var text = texts[i].substring(1);
+            text = text.substring(0, text.length-1);
+            var match = text.match(regex);
+            if (match)
+                return match[1];
+        }
     }
+    return undefined;
 }
 
 HousingIndex.prototype.SaveAddress = function(data) {
