@@ -6,7 +6,6 @@ function HousingIndex() {
     this.SetupOptions();
     this.SetupCSS();
     this.SetupSidebar();
-    this.SetupDonateButton();
     this.SetupListings();
     this.SetupFavorites();
     this.SetupMap();
@@ -28,10 +27,6 @@ HousingIndex.prototype.SetupSidebar = function() {
         '<div class="progress progress-striped active" id="marker-progress"><div class="bar"></div></div>'
     ).insertAfter('#listings');
     $('#listings blockquote:first').addClass('blockquote-first');
-}
-
-HousingIndex.prototype.SetupDonateButton = function() {
-    $('<a id="donate-link" href="https://www.wepay.com/donations/clmapper"><img src="'+chrome.extension.getURL('images/donate-green.png')+'" border="0" title="Keep the features rollin, donate!" /></a>').insertAfter('#listings');
 }
 
 HousingIndex.prototype.SetupOptions = function() {
