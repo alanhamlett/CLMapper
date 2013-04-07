@@ -259,7 +259,7 @@ HousingIndex.prototype.AddMarkersFromPage = function() {
             this.GetHtml(item);
         } else {
             //console.warn('Could not find url from post link: '+row);
-            this.IncrementProgressBar();
+            this.IncrementProgressBar($($ps[row]));
         }
     }
 }
@@ -273,7 +273,7 @@ HousingIndex.prototype.GetHtml = function(item) {
             this.ProcessHtml(responseText, item);
         }, this),
         error: $.proxy(function() {
-            this.IncrementProgressBar();
+            this.IncrementProgressBar($($('p.row')[item.row]));
         }, this)
     });
 }
@@ -294,20 +294,20 @@ HousingIndex.prototype.ProcessHtml = function(responseText, item) {
                     delete result['url'];
                     this.SaveAddress(result);
                     this.AddMarker(result, item, title);
-                    this.IncrementProgressBar();
+                    this.IncrementProgressBar($($('p.row')[item.row]), true);
                 }, this),
                 $.proxy(function(errorMsg) {
-                    this.IncrementProgressBar();
+                    this.IncrementProgressBar($($('p.row')[item.row]));
                 }, this)
             );
         } else {
             this.SaveAddress(geocoded);
             this.AddMarker(geocoded, item, title);
-            this.IncrementProgressBar();
+            this.IncrementProgressBar($($('p.row')[item.row]), true);
         }
     } else {
         //console.warn('Could not find address for post: '+item.url);
-        this.IncrementProgressBar();
+        this.IncrementProgressBar($($('p.row')[item.row]));
     }
 }
 
@@ -378,12 +378,14 @@ HousingIndex.prototype.AddMarker = function(address, item, title) {
     }
 }
 
-HousingIndex.prototype.IncrementProgressBar = function() {
+HousingIndex.prototype.IncrementProgressBar = function($p, onMap) {
     this.NumMarkersAdded++;
     if (this.NumMarkersAdded >= this.TotalPosts) {
         $('#marker-progress').remove();
     } else {
         $('#marker-progress > div').css('width', (this.NumMarkersAdded / this.TotalPosts * 100)+'%');
     }
+    if (!onMap)
+        $p.find('.itempnr').append($('<img title="Address not found, no marker on map for this listing." style="position:relative;top:1px;" src="'+chrome.extension.getURL('/images/icon-ban-circle.png')+'">'));
 }
 
