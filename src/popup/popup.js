@@ -22,6 +22,8 @@ Popup.prototype.SetupFavorites = function() {
                 var star = chrome.extension.getURL('images/star.png');
                 var star_empty = chrome.extension.getURL('images/star-empty.png');
                 $.each(response.favorites, function(key, value) {
+                    if (!$.trim(value.title))
+                        value.title = 'unknown';
                     var $li = $('<div><img class="favorite-icon" src="'+star+'" /><a target="_blank"></a></div>');
                     var $a = $li.find('a');
                     $a.attr('href', key);

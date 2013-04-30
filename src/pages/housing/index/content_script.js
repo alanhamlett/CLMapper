@@ -208,7 +208,7 @@ HousingIndex.prototype.AddStarIcon = function($row) {
     var title = url;
     $row.find('a').each(function() {
         var $this = $(this);
-        if ($this.text()) {
+        if ($.trim($this.text())) {
             url = $this.prop('href');
             title = $this.text();
             return false;
