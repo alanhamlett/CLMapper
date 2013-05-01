@@ -11,10 +11,21 @@
         <div class="navbar navbar-fixed-top">
             <div class="navbar-inner">
                 <div id="nav-brand" class="brand">CLMapper</div>
-                <ul class="nav">
+                <ul class="nav pull-right">
+                  <li><div class="collaborate" style="float:none;padding:10px 15px 10px;color:#777777;text-decoration:none;text-shadow:0 1px 0 #ffffff;cursor:pointer;">Collaborate with friends!</div></li>
                 </ul>
             </div>
         </div>
         <div id="favorites"></div>
+        <div id="collaborate-content" style="display:none;">
+          <h3>Share your secret to let friends join your list:</h3>
+          <p class="my-secret"></p>
+          <br />
+          <h3>Enter a friend's secret to join their list:</h3>
+          <form class="join">
+            <input class="friend-secret input-xlarge" type="text" style="width:280px" /><br />
+            <button type="submit" class="btn">Join List</button> <p class="friend-secret-flash"></p>
+          </form>
+        </div>
     </body>
 </html>

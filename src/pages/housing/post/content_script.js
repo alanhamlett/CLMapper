@@ -49,9 +49,9 @@ HousingPost.prototype.AddStarIcon = function(url) {
     var $starIcon = $('<img class="favorite-icon" />');
     $starIcon.attr('url', url);
     $('h2:first').prepend($starIcon);
-    chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
+    chrome.extension.sendMessage({type: 'GetFavorite', url: url}, $.proxy(function(response) {
         if (!response.error) {
-            if (response.favorites[url]) {
+            if (response.favorite) {
                 $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
                 $starIcon.attr('favorite', 'true');
             } else {

@@ -1,6 +1,6 @@
 {
     "name": "CLMapper",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
     "homepage_url": "http://ahamlett.com",
@@ -16,6 +16,7 @@
             "js": [
                 "libs/jquery.js",
                 "libs/lscache.js",
+                "libs/md5.js",
                 "libs/PageInterface.js",
                 "libs/Geocoder.js",
                 "libs/jquery.scrollTo.js",
@@ -28,7 +29,7 @@
     ],
     "background": {
         "persistent": false,
-        "scripts": ["background.js", "libs/lscache.js"]
+        "scripts": ["libs/jquery.js", "libs/md5.js", "libs/lscache.js", "background.js"]
     },
     "browser_action": {
         "default_icon": "images/icon16.png",
@@ -62,5 +63,5 @@
         "128": "images/icon128.png"
     },
     "minimum_chrome_version": "20",
-    "permissions": [ "storage", "http://maps.googleapis.com/", "*://*.craigslist.org/", "*://*.craigslist.com.mx/", "*://*.craigslist.co.uk/", "*://*.craigslist.ca/", "*://*.craigslist.de/", "*://*.craigslist.co.kr/", "*://*.craigslist.co.in/", "*://*.craigslist.se/", "*://*.craigslist.at/" ]
+    "permissions": [ "storage", "https://clmapper.firebaseio.com/", "http://maps.googleapis.com/", "*://*.craigslist.org/", "*://*.craigslist.com.mx/", "*://*.craigslist.co.uk/", "*://*.craigslist.ca/", "*://*.craigslist.de/", "*://*.craigslist.co.kr/", "*://*.craigslist.co.in/", "*://*.craigslist.se/", "*://*.craigslist.at/" ]
 }

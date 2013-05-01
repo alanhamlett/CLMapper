@@ -167,13 +167,19 @@ HousingIndex.prototype.ClickListing = function(url) {
 
 HousingIndex.prototype.SetupFavorites = function() {
     var $ps = $('p.row');
-    for (var row = 0; row < $ps.length; row++) {
-        this.AddStarIcon($($ps[row]));
-    }
-    var index = this;
-    $('img.favorite-icon').on('click', function() {
-        index.ToggleFavorite($(this));
-    });
+    chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
+        if (!response.error) {
+            for (var row = 0; row < $ps.length; row++) {
+                this.AddStarIcon($($ps[row]), response.favorites);
+            }
+            var index = this;
+            $('img.favorite-icon').on('click', function() {
+                index.ToggleFavorite($(this));
+            });
+        } else {
+            console.warn(response.error);
+        }
+    }, this));
 }
 
 HousingIndex.prototype.ToggleFavorite = function($icon) {
@@ -203,7 +209,7 @@ HousingIndex.prototype.ToggleFavorite = function($icon) {
     }
 }
 
-HousingIndex.prototype.AddStarIcon = function($row) {
+HousingIndex.prototype.AddStarIcon = function($row, favorites) {
     var url = $row.find('a:first').prop('href');
     var title = url;
     $row.find('a').each(function() {
@@ -219,19 +225,13 @@ HousingIndex.prototype.AddStarIcon = function($row) {
     $starIcon.attr('data-url', url);
     $starIcon.attr('data-title', title);
     $row.prepend($starIcon);
-    chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
-        if (!response.error) {
-            if (response.favorites[url]) {
-                $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
-                $starIcon.attr('favorite', 'true');
-            } else {
-                $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
-                $starIcon.attr('favorite', 'false');
-            }
-        } else {
-            console.warn(response.error);
-        }
-    }, this));
+    if (favorites && favorites[md5(url)]) {
+        $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
+        $starIcon.attr('favorite', 'true');
+    } else {
+        $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
+        $starIcon.attr('favorite', 'false');
+    }
 }
 
 HousingIndex.prototype.AddMarkersFromPage = function() {

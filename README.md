@@ -1,4 +1,4 @@
-CLMapper 1.4.2
+CLMapper 1.5.0
 ========
 
 Craigslist posts shown on a map.
