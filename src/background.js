@@ -13,7 +13,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                     sendResponse({favorites: response});
                 },
                 error: function(error) {
-                    sendResponse({error: error});
+                    sendResponse({error: error.statusText});
                 },
             });
         }
@@ -26,61 +26,69 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                     sendResponse({favorite: response});
                 },
                 error: function(error) {
-                    sendResponse({error: error});
+                    sendResponse({error: error.statusText});
                 },
             });
         }
         if (request.type === 'MergeFavorites') {
-            $.ajax({
-                type: 'GET',
-                url: 'https://clmapper.firebaseio.com/'+encodeURIComponent(request.secret)+'/favorites.json',
-                dataType: 'json',
-                success: function(newfavorites) {
-                    if (newfavorites !== null) {
-                        $.ajax({
-                            type: 'GET',
-                            url: 'https://clmapper.firebaseio.com/'+lscache.get('mysecret')+'/favorites.json',
-                            dataType: 'json',
-                            success: function(response) {
-                                if (!response)
-                                    response = {};
-                                $.ajax({
-                                    type: 'PATCH',
-                                    url: 'https://clmapper.firebaseio.com/'+request.secret+'/favorites.json',
-                                    dataType: 'json',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify(response),
-                                    success: function() {
+            request.secret = $.trim(request.secret);
+            if (lscache.get('mysecret') == request.secret) {
+                sendResponse({error: 'Cannot join to your secret'});
+            } else {
+                $.ajax({
+                    type: 'GET',
+                    url: 'https://clmapper.firebaseio.com/'+encodeURIComponent(request.secret)+'/favorites.json',
+                    dataType: 'json',
+                    success: function(newFavorites) {
+                        if (newFavorites) {
+                            $.ajax({
+                                type: 'GET',
+                                url: 'https://clmapper.firebaseio.com/'+lscache.get('mysecret')+'/favorites.json',
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response) {
                                         $.ajax({
-                                            type: 'DELETE',
-                                            url: 'https://clmapper.firebaseio.com/'+lscache.get('mysecret')+'.json',
+                                            type: 'PATCH',
+                                            url: 'https://clmapper.firebaseio.com/'+request.secret+'/favorites.json',
                                             dataType: 'json',
+                                            contentType: 'application/json',
+                                            data: JSON.stringify(response),
                                             success: function() {
-                                                lscache.set('mysecret', request.secret);
-                                                sendResponse({});
+                                                $.ajax({
+                                                    type: 'DELETE',
+                                                    url: 'https://clmapper.firebaseio.com/'+lscache.get('mysecret')+'.json',
+                                                    dataType: 'json',
+                                                    success: function() {
+                                                        lscache.set('mysecret', request.secret);
+                                                        sendResponse({});
+                                                    },
+                                                    error: function(error) {
+                                                        sendResponse({error: error.statusText});
+                                                    },
+                                                });
                                             },
                                             error: function(error) {
-                                                sendResponse({error: error});
+                                                sendResponse({error: error.statusText});
                                             },
                                         });
-                                    },
-                                    error: function(error) {
-                                        sendResponse({error: error});
-                                    },
-                                });
-                            },
-                            error: function(error) {
-                                sendResponse({error: error});
-                            },
-                        });
-                    } else {
-                        sendResponse({error: 'Invalid secret'});
-                    }
-                },
-                error: function(error) {
-                    sendResponse({error: error});
-                },
-            });
+                                    } else {
+                                        lscache.set('mysecret', request.secret);
+                                        sendResponse({});
+                                    }
+                                },
+                                error: function(error) {
+                                    sendResponse({error: error.statusText});
+                                },
+                            });
+                        } else {
+                            sendResponse({error: 'Invalid secret'});
+                        }
+                    },
+                    error: function(error) {
+                        sendResponse({error: error.statusText});
+                    },
+                });
+            }
         }
         if (request.type === 'AddFavorite') {
             $.ajax({
@@ -96,7 +104,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                     sendResponse({});
                 },
                 error: function(error) {
-                    sendResponse({error: error});
+                    sendResponse({error: error.statusText});
                 },
             });
         }
@@ -109,7 +117,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
                     sendResponse({});
                 },
                 error: function(error) {
-                    sendResponse({error: error});
+                    sendResponse({error: error.statusText});
                 },
             });
         }

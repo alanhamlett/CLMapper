@@ -33,17 +33,19 @@ Popup.prototype.SetupNavbar = function() {
             });
         }
     });
-    $('#collaborate-content form.join').on('submit', function(e) {
+    $('#collaborate-content form.join').on('submit', $.proxy(function(e) {
         e.preventDefault();
         chrome.extension.sendMessage({type: 'MergeFavorites', secret: $('.friend-secret').val()}, $.proxy(function(response) {
             if (!response.error) {
-                $('.friend-secret-flash').text('It worked!');
+                this.SetupFavorites();
+                $('.friend-secret-flash').text('It worked! Click "Back" to see your shared favorites.');
             } else {
-                console.warn(response.error);
-                $('.friend-secret-flash').text('Error: Invalid secret');
+                if (response.error == 'error')
+                    response.error = 'Unable to connect to the Internet';
+                $('.friend-secret-flash').text('Error: '+response.error);
             }
         }, this));
-    });
+    }, this));
 }
 
 Popup.prototype.SetupFavorites = function() {
@@ -84,7 +86,9 @@ Popup.prototype.SetupFavorites = function() {
                 $favorites.html(this._empty_msg);
             }
         } else {
-            console.warn(response.error);
+            if (response.error == 'error')
+                response.error = 'Unable to connect to the Internet';
+            $('#favorites').empty().text('Error: '+response.error);
         }
     }, this));
 }
