@@ -1,6 +1,6 @@
 {
     "name": "CLMapper",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "manifest_version": 2,
     "description": "Craigslist posts shown on a map.",
     "homepage_url": "http://ahamlett.com",
