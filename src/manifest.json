@@ -27,7 +27,7 @@
     ],
     "background": {
         "persistent": false,
-        "scripts": ["libs/jquery.js", "libs/md5.js", "libs/lscache.js", "background.js"]
+        "scripts": ["libs/jquery.js", "libs/lscache.js", "background.js"]
     },
     "web_accessible_resources": [
         "pages/housing/index/bootstrap.css",
