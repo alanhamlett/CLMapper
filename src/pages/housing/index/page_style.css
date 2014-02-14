@@ -1,7 +1,4 @@
 
-body {
-}
-
 p.row < p {
     margin-right: auto;
     width: 100%;
@@ -83,26 +80,6 @@ blockquote.blockquote-first fieldset {
     border: 2px solid black;
 }
 
-#donate-link {
-    position: fixed;
-    top: 4px;
-    right: 120px;
-    z-index: 2;
-}
-
-#donate-link img {
-    height: 28px;
-}
-
 #hoodtitle {
     white-space: normal;
 }
-
-img.favorite-icon {
-    position: relative;
-    top: 3px;
-    left: 2px;
-    cursor: pointer;
-    margin-left: 10px;
-}
-

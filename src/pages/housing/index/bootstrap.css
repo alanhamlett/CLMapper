@@ -8,26 +8,6 @@
  * Designed and built with all the love in the world @twitter by @mdo and @fat.
  */
 
-.row {
-  margin-left: -20px;
-  *zoom: 1;
-}
-
-.row:before,
-.row:after {
-  display: table;
-  content: "";
-}
-
-.row:after {
-  clear: both;
-}
-
-[class*="span"] {
-  float: left;
-  /*margin-left: 20px;*/
-}
-
 .container,
 .navbar-fixed-top .container,
 .navbar-fixed-bottom .container {

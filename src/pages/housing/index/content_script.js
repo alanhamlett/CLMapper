@@ -7,7 +7,6 @@ function HousingIndex() {
     this.SetupCSS();
     this.SetupSidebar();
     this.SetupListings();
-    this.SetupFavorites();
     this.SetupMap();
 
     return this;
@@ -163,75 +162,6 @@ HousingIndex.prototype.ClickListing = function(url) {
         window.postMessage({ type: 'ClickMarker', data: {url: url} }, '*');
     } catch (e) { }
     window.open(url);
-}
-
-HousingIndex.prototype.SetupFavorites = function() {
-    var $ps = $('p.row');
-    chrome.extension.sendMessage({type: 'GetFavorites'}, $.proxy(function(response) {
-        if (!response.error) {
-            for (var row = 0; row < $ps.length; row++) {
-                this.AddStarIcon($($ps[row]), response.favorites);
-            }
-            var index = this;
-            $('img.favorite-icon').on('click', function() {
-                index.ToggleFavorite($(this));
-            });
-        } else {
-            console.warn(response.error);
-        }
-    }, this));
-}
-
-HousingIndex.prototype.ToggleFavorite = function($icon) {
-    if ($icon.attr('data-url') && $icon.attr('favorite')) {
-        var url = $icon.attr('data-url');
-        var title = $icon.attr('data-title');
-        var favorite = $icon.attr('favorite');
-        if (favorite === 'true') {
-            chrome.extension.sendMessage({type: 'RemFavorite', url: url}, $.proxy(function(response) {
-                if (!response.error) {
-                    $icon.attr('src', chrome.extension.getURL('images/star-empty.png'));
-                    $icon.attr('favorite', 'false');
-                } else {
-                    console.warn(response.error);
-                }
-            }, this));
-        } else if (favorite === 'false') {
-            chrome.extension.sendMessage({type: 'AddFavorite', url: url, title: title}, $.proxy(function(response) {
-                if (!response.error) {
-                    $icon.attr('src', chrome.extension.getURL('images/star.png'));
-                    $icon.attr('favorite', 'true');
-                } else {
-                    console.warn(response.error);
-                }
-            }, this));
-        }
-    }
-}
-
-HousingIndex.prototype.AddStarIcon = function($row, favorites) {
-    var url = $row.find('a:first').prop('href');
-    var title = url;
-    $row.find('a').each(function() {
-        var $this = $(this);
-        if ($.trim($this.text())) {
-            url = $this.prop('href');
-            title = $this.text();
-            return false;
-        }
-        return true;
-    });
-    var $starIcon = $('<img class="favorite-icon" />');
-    $starIcon.attr('data-url', url);
-    $starIcon.attr('data-title', title);
-    $row.prepend($starIcon);
-    if (favorites && favorites[md5(url)]) {
-        $starIcon.attr('src', chrome.extension.getURL('images/star.png'));
-        $starIcon.attr('favorite', 'true');
-    } else {
-        $starIcon.attr('src', chrome.extension.getURL('images/star-empty.png'));
-        $starIcon.attr('favorite', 'false');
-    }
 }
 
 HousingIndex.prototype.AddMarkersFromPage = function() {
